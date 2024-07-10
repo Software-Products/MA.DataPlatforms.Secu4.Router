@@ -1,0 +1,103 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouterComponent", "MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatform.Secu4.RouterComponent.csproj", "{FC56EC01-B4CD-477B-84CE-44AA9B6A3846}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka", "MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka\MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.csproj", "{414C6E6D-63FF-493F-A3A0-81A125843761}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouterComponent.UnitTest", "MA.DataPlatforms.Secu4.RouterComponent.UnitTest\MA.DataPlatform.Secu4.RouterComponent.UnitTest.csproj", "{75908684-135F-468A-9E25-3C5D95868EC9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouterComponent.UsageSample", "MA.DataPlatform.Secu4.RouterComponent.UsageSample\MA.DataPlatform.Secu4.RouterComponent.UsageSample.csproj", "{906A1C41-FA19-4A56-9F32-DA4A30FA70CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteSubscriberComponent", "MA.DataPlatform.Secu4.RouteSubscriberComponent\MA.DataPlatform.Secu4.RouteSubscriberComponent.csproj", "{A0CE419D-A220-41A1-8206-AE3FE4520686}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.Routing.Contracts", "MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatform.Secu4.Routing.Contracts.csproj", "{E891A2A9-0D3A-498F-91E3-290B4D52649D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteSubscriberComponent.UnitTests", "MA.DataPlatform.Secu4.RouteSubscriberComponent.UnitTests\MA.DataPlatform.Secu4.RouteSubscriberComponent.UnitTests.csproj", "{9D1934AE-B5D5-46B7-BD4C-E94CFE8268CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka", "MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka\MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.csproj", "{A1BAE485-8E84-4EFB-AFCC-77F8A88C96B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteReaderComponent", "MA.DataPlatform.Secu4.RouteReaderComponent\MA.DataPlatform.Secu4.RouteReaderComponent.csproj", "{E33E10D3-897C-4A06-8247-F6FB6C3C5410}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.KafkaMetadataComponent", "MA.DataPlatform.Secu4.KafkaMetadataComponent\MA.DataPlatform.Secu4.KafkaMetadataComponent.csproj", "{0EDF8EE9-3CF2-405E-A8BC-D63B1FF3A70A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteReaderComponent.UnitTests", "MA.DataPlatform.Secu4.RouteReaderComponent.UnitTests\MA.DataPlatform.Secu4.RouteReaderComponent.UnitTests.csproj", "{682B749D-07B5-4E19-B348-CB2454C13387}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest", "MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest\MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.csproj", "{C9FA7825-D671-4D4C-A489-A19952BD54F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.RouteReaderComponent.IntegrationTest.Kafka", "MA.DataPlatform.Secu4.RouteReaderComponent.IntegrationTest.Kafka\MA.DataPlatform.Secu4.RouteReaderComponent.IntegrationTest.Kafka.csproj", "{02501117-7737-494E-ADB2-9F62AFBB8481}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.Routing.Shared", "MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatform.Secu4.Routing.Shared.csproj", "{46317222-CBBA-4F02-BB0A-D23AF2250C28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC56EC01-B4CD-477B-84CE-44AA9B6A3846}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC56EC01-B4CD-477B-84CE-44AA9B6A3846}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC56EC01-B4CD-477B-84CE-44AA9B6A3846}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC56EC01-B4CD-477B-84CE-44AA9B6A3846}.Release|Any CPU.Build.0 = Release|Any CPU
+		{414C6E6D-63FF-493F-A3A0-81A125843761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{414C6E6D-63FF-493F-A3A0-81A125843761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{414C6E6D-63FF-493F-A3A0-81A125843761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{414C6E6D-63FF-493F-A3A0-81A125843761}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75908684-135F-468A-9E25-3C5D95868EC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75908684-135F-468A-9E25-3C5D95868EC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75908684-135F-468A-9E25-3C5D95868EC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75908684-135F-468A-9E25-3C5D95868EC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{906A1C41-FA19-4A56-9F32-DA4A30FA70CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{906A1C41-FA19-4A56-9F32-DA4A30FA70CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{906A1C41-FA19-4A56-9F32-DA4A30FA70CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{906A1C41-FA19-4A56-9F32-DA4A30FA70CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0CE419D-A220-41A1-8206-AE3FE4520686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0CE419D-A220-41A1-8206-AE3FE4520686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0CE419D-A220-41A1-8206-AE3FE4520686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0CE419D-A220-41A1-8206-AE3FE4520686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E891A2A9-0D3A-498F-91E3-290B4D52649D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E891A2A9-0D3A-498F-91E3-290B4D52649D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E891A2A9-0D3A-498F-91E3-290B4D52649D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E891A2A9-0D3A-498F-91E3-290B4D52649D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D1934AE-B5D5-46B7-BD4C-E94CFE8268CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D1934AE-B5D5-46B7-BD4C-E94CFE8268CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D1934AE-B5D5-46B7-BD4C-E94CFE8268CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D1934AE-B5D5-46B7-BD4C-E94CFE8268CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1BAE485-8E84-4EFB-AFCC-77F8A88C96B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1BAE485-8E84-4EFB-AFCC-77F8A88C96B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1BAE485-8E84-4EFB-AFCC-77F8A88C96B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1BAE485-8E84-4EFB-AFCC-77F8A88C96B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E33E10D3-897C-4A06-8247-F6FB6C3C5410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E33E10D3-897C-4A06-8247-F6FB6C3C5410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E33E10D3-897C-4A06-8247-F6FB6C3C5410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E33E10D3-897C-4A06-8247-F6FB6C3C5410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDF8EE9-3CF2-405E-A8BC-D63B1FF3A70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDF8EE9-3CF2-405E-A8BC-D63B1FF3A70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDF8EE9-3CF2-405E-A8BC-D63B1FF3A70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDF8EE9-3CF2-405E-A8BC-D63B1FF3A70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{682B749D-07B5-4E19-B348-CB2454C13387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{682B749D-07B5-4E19-B348-CB2454C13387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{682B749D-07B5-4E19-B348-CB2454C13387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{682B749D-07B5-4E19-B348-CB2454C13387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9FA7825-D671-4D4C-A489-A19952BD54F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9FA7825-D671-4D4C-A489-A19952BD54F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9FA7825-D671-4D4C-A489-A19952BD54F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9FA7825-D671-4D4C-A489-A19952BD54F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02501117-7737-494E-ADB2-9F62AFBB8481}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02501117-7737-494E-ADB2-9F62AFBB8481}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02501117-7737-494E-ADB2-9F62AFBB8481}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02501117-7737-494E-ADB2-9F62AFBB8481}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91578CFA-E1E2-4129-B2E1-116FB357E0C8}
+	EndGlobalSection
+EndGlobal

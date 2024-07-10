@@ -1,0 +1,21 @@
+{
+  "Routes": [
+    {
+      "name": "appgroup1",
+      "topic": "t_app_1",
+      "partition": "1"
+    },
+    {
+      "name": "appgroup1",
+      "topic": "t_app_1",
+      "partition": "1"
+    },
+    {
+      "name": "session-manager",
+      "topic": "t_general_topic",
+      "partition": "1"
+    }
+  ]
+  
+
+}
