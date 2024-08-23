@@ -20,6 +20,9 @@ using System.Diagnostics;
 using FluentAssertions;
 
 using MA.Common;
+using MA.Common.Abstractions;
+
+using NSubstitute;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -29,11 +32,14 @@ namespace MA.DataPlatform.Secu4.RouterComponent.UnitTest.Common
     public class KeyGeneratorServiceShould
     {
         private readonly ITestOutputHelper outputHelper;
-        private readonly KeyGeneratorService keyGenerator = new();
+        private readonly ILoggingDirectoryProvider loggingDirectoryProvider = Substitute.For<ILoggingDirectoryProvider>();
+        private readonly KeyGeneratorService keyGenerator;
 
         public KeyGeneratorServiceShould(ITestOutputHelper outputHelper)
         {
             this.outputHelper = outputHelper;
+            this.loggingDirectoryProvider.Provide().Returns("");
+            this.keyGenerator = new KeyGeneratorService(this.loggingDirectoryProvider);
         }
 
         [Fact]
