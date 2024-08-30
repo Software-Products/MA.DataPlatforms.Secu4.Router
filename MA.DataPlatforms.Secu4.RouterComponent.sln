@@ -50,8 +50,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.Route
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.Routing.Shared", "MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatform.Secu4.Routing.Shared.csproj", "{46317222-CBBA-4F02-BB0A-D23AF2250C28}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MA.DataPlatform.Secu4.Routing.Profiling", "MA.DataPlatform.Secu4.Routing.Profiling\MA.DataPlatform.Secu4.Routing.Profiling.csproj", "{C40CF233-C2AF-467C-903E-46B6210BDAD0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,10 +112,6 @@ Global
 		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46317222-CBBA-4F02-BB0A-D23AF2250C28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C40CF233-C2AF-467C-903E-46B6210BDAD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C40CF233-C2AF-467C-903E-46B6210BDAD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C40CF233-C2AF-467C-903E-46B6210BDAD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C40CF233-C2AF-467C-903E-46B6210BDAD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
