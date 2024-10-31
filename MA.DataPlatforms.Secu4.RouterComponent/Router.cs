@@ -16,13 +16,13 @@
 // </copyright>
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions.Broking;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
-using MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
+using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatform.Secu4.RouterComponent;
+namespace MA.DataPlatforms.Secu4.RouterComponent;
 
 public class Router : IRouter
 {

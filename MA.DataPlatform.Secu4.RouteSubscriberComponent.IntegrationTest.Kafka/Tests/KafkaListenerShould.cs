@@ -18,14 +18,14 @@
 using FluentAssertions;
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Base;
-using MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Helper;
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Base;
+using MA.DataPlatforms.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Helper;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Tests;
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Tests;
 
 [Collection(nameof(RunKafkaDockerComposeCollectionFixture))]
 public class KafkaListenerShould

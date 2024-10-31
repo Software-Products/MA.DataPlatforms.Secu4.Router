@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+      <Title>MA.DataPlatform.Secu4.RouteReaderComponent</Title>
+      <Company>McLaren Applied</Company>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <Authors>McLaren Applied</Authors>
+      <Description>Library containing tools for reading all data packets from broker without subscribing and having a live connection with the broker. The connection closes after reading all the data packets in the broker.</Description>
+	  <RepositoryUrl>https://github.com/mat-docs/packages</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="2.2.0" />
+    <PackageReference Include="MA.Common" Version="1.3.3.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatforms.Secu4.Routing.Contracts.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

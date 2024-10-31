@@ -15,7 +15,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Base;
+namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Base;
 
 [CollectionDefinition(nameof(RunKafkaDockerComposeCollectionFixture))]
 public class RunKafkaDockerComposeCollectionFixture : ICollectionFixture<RunKafkaDockerComposeFixture>

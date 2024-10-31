@@ -27,7 +27,7 @@ using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.UnitTest.Common
+namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.Common
 {
     public class KeyGeneratorServiceShould
     {

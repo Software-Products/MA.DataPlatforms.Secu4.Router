@@ -19,10 +19,10 @@ using Confluent.Kafka;
 
 using MA.Common;
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking.Producing;
+namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking.Producing;
 
 public class KafkaProducer : IKafkaProducer
 {

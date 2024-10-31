@@ -17,9 +17,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using MA.DataPlatform.Secu4.Routing.Contracts.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 
 [ExcludeFromCodeCoverage]
 public class EmptyKafkaTopicMetaData : IKafkaTopicMetaData

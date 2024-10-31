@@ -17,7 +17,7 @@
 
 using Xunit;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
+namespace MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
 
 [CollectionDefinition(nameof(RunKafkaDockerComposeCollectionFixture))]
 public class RunKafkaDockerComposeCollectionFixture : ICollectionFixture<RunKafkaDockerComposeFixture>

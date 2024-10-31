@@ -18,12 +18,12 @@
 using Confluent.Kafka;
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouteSubscriberComponent.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Consuming;
+using MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Consuming;
 
-namespace MA.DataPlatform.Secu4.RouteSubscriberComponent;
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent;
 
 public class KafkaListener : KafkaConsumer, IKafkaListener
 {

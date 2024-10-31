@@ -16,10 +16,10 @@
 // </copyright>
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouteReaderComponent.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatform.Secu4.RouteReaderComponent;
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent;
 
 public class KafkaReaderFactory : IKafkaReaderFactory
 {
@@ -27,7 +27,10 @@ public class KafkaReaderFactory : IKafkaReaderFactory
     private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     private readonly ILogger logger;
 
-    public KafkaReaderFactory(IConsumingConfigurationProvider consumingConfigurationProvider, ICancellationTokenSourceProvider cancellationTokenSourceProvider,ILogger logger)
+    public KafkaReaderFactory(
+        IConsumingConfigurationProvider consumingConfigurationProvider,
+        ICancellationTokenSourceProvider cancellationTokenSourceProvider,
+        ILogger logger)
     {
         this.consumingConfigurationProvider = consumingConfigurationProvider;
         this.cancellationTokenSourceProvider = cancellationTokenSourceProvider;
@@ -36,6 +39,6 @@ public class KafkaReaderFactory : IKafkaReaderFactory
 
     public IKafkaReader Create()
     {
-        return new KafkaReader(this.consumingConfigurationProvider, this.cancellationTokenSourceProvider,this.logger);
+        return new KafkaReader(this.consumingConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
     }
 }

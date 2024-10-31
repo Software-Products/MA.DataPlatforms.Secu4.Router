@@ -17,7 +17,7 @@
 
 using Confluent.Kafka;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.Helper;
+namespace MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Helper;
 
 internal class KafkaHelperListener<TKey, TData>
 {

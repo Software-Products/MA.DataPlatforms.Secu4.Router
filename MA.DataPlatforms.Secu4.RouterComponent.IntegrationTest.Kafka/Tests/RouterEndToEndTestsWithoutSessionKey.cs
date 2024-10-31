@@ -20,17 +20,17 @@ using System.Collections.Concurrent;
 using FluentAssertions;
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
-using MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
-using MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.Helper;
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+using MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
+using MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Helper;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
 using NSubstitute;
 
 using Xunit;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka.Tests;
+namespace MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Tests;
 
 [Collection(nameof(RunKafkaDockerComposeCollectionFixture))]
 public class RouterEndToEndTests

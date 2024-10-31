@@ -17,7 +17,7 @@
 
 using System.Diagnostics;
 
-namespace MA.DataPlatform.Secu4.RouteReaderComponent.IntegrationTest.Kafka.Helper
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.IntegrationTest.Kafka.Helper
 {
     public class ShellCommandExecutor
     {

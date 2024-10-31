@@ -18,12 +18,12 @@
 using Confluent.Kafka;
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.RouteReaderComponent.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Consuming;
+using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Consuming;
 
-namespace MA.DataPlatform.Secu4.RouteReaderComponent;
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent;
 
 public class KafkaReader : KafkaConsumer, IKafkaReader
 {
@@ -42,7 +42,6 @@ public class KafkaReader : KafkaConsumer, IKafkaReader
     {
         try
         {
-
             if (this.Consumer == null)
             {
                 return;
