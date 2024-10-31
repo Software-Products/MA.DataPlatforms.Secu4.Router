@@ -15,7 +15,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 
 public interface IKafkaQueueFullRetryExecutor
 {

@@ -17,5 +17,5 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("MA.DataPlatform.Secu4.RouterComponent.UnitTest")]
-[assembly: InternalsVisibleTo("MA.DataPlatform.Secu4.RouterComponent.IntegrationTest.Kafka")]
+[assembly: InternalsVisibleTo("MA.DataPlatforms.Secu4.RouterComponent.UnitTest")]
+[assembly: InternalsVisibleTo("MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka")]

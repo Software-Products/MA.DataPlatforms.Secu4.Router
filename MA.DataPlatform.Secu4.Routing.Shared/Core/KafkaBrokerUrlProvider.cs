@@ -15,9 +15,9 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatform.Secu4.Routing.Shared.Core;
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 public class KafkaBrokerUrlProvider : IBrokerUrlProvider
 {

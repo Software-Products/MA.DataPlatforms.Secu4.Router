@@ -1,4 +1,4 @@
-// <copyright file="RunKafkaDockerComposeCollectionFixture.cs" company="McLaren Applied Ltd.">
+// <copyright file="WaitHandler.cs" company="McLaren Applied Ltd.">
 //
 // Copyright 2024 McLaren Applied Ltd
 // 
@@ -15,12 +15,12 @@
 // limitations under the License.
 // </copyright>
 
-using Xunit;
+using System.Diagnostics.CodeAnalysis;
 
-namespace MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
+namespace MA.DataPlatforms.Secu4.Routing.Profiling;
 
-[CollectionDefinition(nameof(RunKafkaDockerComposeCollectionFixture))]
-public class RunKafkaDockerComposeCollectionFixture : ICollectionFixture<RunKafkaDockerComposeFixture>
+[ExcludeFromCodeCoverage]
+public static class WaitHandler
 {
-    // This class has no code because it only serves as a marker for the collection fixture.
+    public static readonly AutoResetEvent WaitEvent = new(false);
 }

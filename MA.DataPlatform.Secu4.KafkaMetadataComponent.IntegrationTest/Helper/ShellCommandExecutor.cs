@@ -17,7 +17,7 @@
 
 using System.Diagnostics;
 
-namespace MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Helper
+namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Helper
 {
     public class ShellCommandExecutor
     {

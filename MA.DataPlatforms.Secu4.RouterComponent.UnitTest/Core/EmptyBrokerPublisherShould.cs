@@ -16,13 +16,13 @@
 // </copyright>
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
 using NSubstitute;
 
 using Xunit;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.UnitTest.Core;
+namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.Core;
 
 public class EmptyBrokerPublisherShould
 {

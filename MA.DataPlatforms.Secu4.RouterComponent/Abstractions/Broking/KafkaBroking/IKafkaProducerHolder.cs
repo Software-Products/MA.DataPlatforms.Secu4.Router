@@ -15,9 +15,9 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
+namespace MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 
 public interface IKafkaProducerHolder : IDisposable
 {

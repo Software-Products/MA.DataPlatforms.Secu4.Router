@@ -1,4 +1,4 @@
-// <copyright file="EmptyKafkaTopicMetaData.cs" company="McLaren Applied Ltd.">
+// <copyright file="Program.cs" company="McLaren Applied Ltd.">
 //
 // Copyright 2024 McLaren Applied Ltd
 // 
@@ -17,16 +17,22 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
-
-namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+namespace MA.DataPlatforms.Secu4.Routing.Profiling;
 
 [ExcludeFromCodeCoverage]
-public class EmptyKafkaTopicMetaData : IKafkaTopicMetaData
+internal static class Program
 {
-    public string Topic => "";
-
-    public int? NumberOfPartitions => 0;
-
-    public short? ReplicationFactor => 0;
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Testing Publishing Performance");
+        var tester = new RouterTester(1_000_000, 130);
+        tester.Setup();
+        Console.WriteLine("Press Enter To Start Testing Publishing...");
+        Console.ReadLine();
+        Console.WriteLine($"Started:{DateTime.Now.TimeOfDay}");
+        _ = Task.Run(tester.Start);
+        WaitHandler.WaitEvent.WaitOne();
+        Console.WriteLine($"finished:{DateTime.Now.TimeOfDay}");
+        Console.ReadLine();
+    }
 }

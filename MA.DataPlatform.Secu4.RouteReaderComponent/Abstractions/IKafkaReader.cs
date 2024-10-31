@@ -15,9 +15,9 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatform.Secu4.Routing.Shared.Consuming;
+using MA.DataPlatforms.Secu4.Routing.Shared.Consuming;
 
-namespace MA.DataPlatform.Secu4.RouteReaderComponent.Abstractions;
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
 
 public interface IKafkaReader : IKafkaConsumer
 {

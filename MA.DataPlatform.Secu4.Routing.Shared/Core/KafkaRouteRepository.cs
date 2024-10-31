@@ -17,11 +17,11 @@
 
 using System.Collections.Concurrent;
 
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Contracts.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatform.Secu4.Routing.Shared.Core
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Core
 {
     public class KafkaRouteRepository : IKafkaRouteRepository
     {

@@ -4,12 +4,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Title>MA.DataPlatform.Secu4.RouteSubscriberComponent</Title>
     <Company>McLaren Applied</Company>
       <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
       <Authors>McLaren Applied</Authors>
       <Description>Library containing tools for subscribing to a route to get all data packets published. The connection will remain with the broker until it unsubscribes from the broker.</Description>
+	  <RepositoryUrl>https://github.com/mat-docs/packages</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatform.Secu4.Routing.Contracts.csproj" />
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatform.Secu4.Routing.Shared.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatforms.Secu4.Routing.Contracts.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace MA.DataPlatform.Secu4.Routing.Contracts.Abstractions;
+namespace MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
 
 public interface IRouteMetadata
 {

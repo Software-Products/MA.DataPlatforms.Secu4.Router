@@ -18,9 +18,9 @@
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Helper;
+namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Helper;
 
 internal class KafkaHelperTopicCreator
 {

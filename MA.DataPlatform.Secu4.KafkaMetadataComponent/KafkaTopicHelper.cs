@@ -17,7 +17,7 @@
 
 using Confluent.Kafka;
 
-namespace MA.DataPlatform.Secu4.KafkaMetadataComponent;
+namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent;
 
 public class KafkaTopicHelper : IKafkaTopicHelper
 {

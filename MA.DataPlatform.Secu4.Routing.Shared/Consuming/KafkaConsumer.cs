@@ -19,12 +19,12 @@ using Confluent.Kafka;
 
 using MA.Common;
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Contracts.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Core;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
-namespace MA.DataPlatform.Secu4.Routing.Shared.Consuming;
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Consuming;
 
 public abstract class KafkaConsumer : IKafkaConsumer
 {

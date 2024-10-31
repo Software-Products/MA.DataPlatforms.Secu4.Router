@@ -26,11 +26,11 @@
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
-using MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Helper;
+using MA.DataPlatforms.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Helper;
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true)]
 
-namespace MA.DataPlatform.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Base;
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.IntegrationTest.Kafka.Base;
 
 public class RunKafkaDockerComposeFixture : IAsyncLifetime
 {

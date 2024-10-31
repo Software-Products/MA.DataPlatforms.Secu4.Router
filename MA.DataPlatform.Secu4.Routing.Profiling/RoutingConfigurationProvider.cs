@@ -17,10 +17,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.UsageSample;
+namespace MA.DataPlatforms.Secu4.Routing.Profiling;
 
 [ExcludeFromCodeCoverage]
 public class RoutingConfigurationProvider : IRoutingConfigurationProvider
@@ -29,7 +29,7 @@ public class RoutingConfigurationProvider : IRoutingConfigurationProvider
     {
         return new RoutingConfiguration(
             new KafkaRoutingConfig(
-                new KafkaPublishingConfig("localhost:9094", -1, 0, 0, 0, 0),
+                new KafkaPublishingConfig("localhost:9092", -1, 0, 0, 10_000_000, 100_000_000),
                 new List<KafkaRoute>
                 {
                     new("test", "test")

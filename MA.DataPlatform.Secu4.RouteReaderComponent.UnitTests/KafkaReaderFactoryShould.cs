@@ -18,11 +18,11 @@
 using FluentAssertions;
 
 using MA.Common.Abstractions;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatform.Secu4.RouteReaderComponent.UnitTests
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests
 {
     public class KafkaReaderFactoryShould
     {

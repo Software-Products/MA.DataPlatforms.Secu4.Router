@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.KafkaMetadataComponent\MA.DataPlatform.Secu4.KafkaMetadataComponent.csproj" />
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatform.Secu4.Routing.Contracts.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.KafkaMetadataComponent\MA.DataPlatforms.Secu4.KafkaMetadataComponent.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatforms.Secu4.Routing.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

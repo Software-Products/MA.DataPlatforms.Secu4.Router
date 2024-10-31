@@ -12,9 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
-    <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="MA.Common" Version="*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
@@ -22,19 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.RouteReaderComponent\MA.DataPlatform.Secu4.RouteReaderComponent.csproj" />
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatform.Secu4.Routing.Contracts.csproj" />
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatform.Secu4.Routing.Shared.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.RouteSubscriberComponent\MA.DataPlatforms.Secu4.RouteSubscriberComponent.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="docker-compose.yml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

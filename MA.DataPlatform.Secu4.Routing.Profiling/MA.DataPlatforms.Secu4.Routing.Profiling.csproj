@@ -8,11 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MA.DataPlatforms.ServiceConnectors.InAppComponent" Version="1.1.1.41-ci" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatform.Secu4.RouterComponent.csproj" />
+    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
+    <ProjectReference Include="..\MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatforms.Secu4.RouterComponent.csproj" />
   </ItemGroup>
 
 </Project>

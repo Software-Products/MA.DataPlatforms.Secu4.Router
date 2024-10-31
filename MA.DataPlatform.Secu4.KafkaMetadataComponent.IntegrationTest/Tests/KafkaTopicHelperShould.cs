@@ -17,11 +17,11 @@
 
 using FluentAssertions;
 
-using MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Base;
-using MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Helper;
-using MA.DataPlatform.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Base;
+using MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Helper;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatform.Secu4.KafkaMetadataComponent.IntegrationTest.Tests;
+namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Tests;
 
 [Collection(nameof(RunKafkaDockerComposeCollectionFixture))]
 public class KafkaTopicHelperShould
@@ -378,6 +378,14 @@ public class KafkaTopicHelperShould
         var topic3 = $"3_{subString}_test";
         var topic4 = $"4_{subString}_test";
         var topic5 = $"5_test_Unknown_{Guid.NewGuid()}";
+        var lstTopicNames = new List<string>
+        {
+            topic1,
+            topic2,
+            topic3,
+            topic4,
+            topic5
+        };
 
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic1, 1));
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic2, 1));
@@ -391,7 +399,7 @@ public class KafkaTopicHelperShould
         var result = topicHelper.GetInfoByTopicContains(Server, string.Empty);
 
         //assert
-        result = [.. result.OrderBy(i => i.TopicName).ThenBy(i => i.Partition)];
+        result = [.. result.Where(i=> lstTopicNames.Contains(i.TopicName)).OrderBy(i => i.TopicName).ThenBy(i => i.Partition)];
         result.Count.Should().Be(7);
 
         result[0].TopicName.Should().Be(topic1);

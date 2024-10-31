@@ -15,12 +15,12 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatform.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
-using MA.DataPlatform.Secu4.Routing.Contracts;
-using MA.DataPlatform.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatform.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
+namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 
 public sealed class KafkaProducerHolder : IKafkaProducerHolder
 {
