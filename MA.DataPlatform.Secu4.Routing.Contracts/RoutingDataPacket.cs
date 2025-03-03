@@ -22,15 +22,17 @@ public class RoutingDataPacket
     public readonly byte[] Message;
     public readonly string? Key;
     public readonly string Route;
+    public readonly DateTime SubmitTime;
 
-    public RoutingDataPacket(byte[] message, string route)
-        : this(message, route, null)
+    public RoutingDataPacket(byte[] message, string route, DateTime submitTime)
+        : this(message, route, submitTime, null)
     {
     }
 
-    public RoutingDataPacket(byte[] message, string route, string? key)
+    public RoutingDataPacket(byte[] message, string route, DateTime submitTime, string? key)
     {
         this.Route = route;
+        this.SubmitTime = submitTime;
         this.Message = message;
         this.Key = key;
     }

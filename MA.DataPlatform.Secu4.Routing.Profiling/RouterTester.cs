@@ -41,7 +41,7 @@ internal class RouterTester
         {
             var bytes = new byte[sizeOfContent];
             rnd.NextBytes(bytes);
-            this.lstMessages.Add(new RoutingDataPacket(bytes, "test"));
+            this.lstMessages.Add(new RoutingDataPacket(bytes, "test", DateTime.UtcNow));
         }
     }
 

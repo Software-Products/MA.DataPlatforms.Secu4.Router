@@ -66,7 +66,8 @@ namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests
                         [
                             1, 2, 3
                         ],
-                        kafkaRoute.Name)));
+                        kafkaRoute.Name,
+                        DateTime.UtcNow)));
 
             //act
             subscriber.Subscribe();

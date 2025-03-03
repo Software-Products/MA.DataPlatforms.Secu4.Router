@@ -97,9 +97,9 @@ public class RouterEndToEndTests
         router.Initiate();
 
         // act
-        router.Route(new RoutingDataPacket(data1, route1.Name));
-        router.Route(new RoutingDataPacket(data2, route2.Name));
-        router.Route(new RoutingDataPacket(data3, route3.Name));
+        router.Route(new RoutingDataPacket(data1, route1.Name, DateTime.UtcNow));
+        router.Route(new RoutingDataPacket(data2, route2.Name, DateTime.UtcNow));
+        router.Route(new RoutingDataPacket(data3, route3.Name, DateTime.UtcNow));
 
         var listener1 = CreateListener(route1.Topic, token);
         var listener2 = CreateListener(route2.Topic, token);
@@ -177,9 +177,9 @@ public class RouterEndToEndTests
         router.Initiate();
 
         // act
-        router.Route(new RoutingDataPacket(data1, route1.Name, Key1));
-        router.Route(new RoutingDataPacket(data2, route2.Name, Key2));
-        router.Route(new RoutingDataPacket(data3, route3.Name, Key3));
+        router.Route(new RoutingDataPacket(data1, route1.Name, DateTime.UtcNow, Key1));
+        router.Route(new RoutingDataPacket(data2, route2.Name, DateTime.UtcNow,Key2));
+        router.Route(new RoutingDataPacket(data3, route3.Name, DateTime.UtcNow, Key3));
 
         var listener1 = CreateListener(route1.Topic, token);
         var listener2 = CreateListener(route2.Topic, token);
@@ -242,7 +242,7 @@ public class RouterEndToEndTests
         router.Initiate();
 
         // act
-        router.Route(new RoutingDataPacket(data1, route1.Name, Key1));
+        router.Route(new RoutingDataPacket(data1, route1.Name, DateTime.UtcNow, Key1));
         var listener1 = CreateListener(DeadLetterTopic, token);
         listener1.OnReceived += this.KafkaListener_OnReceived;
         _ = Task.Run(() => listener1.Start(), token);
