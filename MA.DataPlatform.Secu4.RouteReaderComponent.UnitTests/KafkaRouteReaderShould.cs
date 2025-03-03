@@ -24,55 +24,55 @@ using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests;
+
+public class KafkaRouteReaderShould
 {
-    public class KafkaRouteReaderShould
+    private readonly IKafkaReaderFactory readerFactory = Substitute.For<IKafkaReaderFactory>();
+
+    [Fact]
+    public void Raise_Event_On_Listener_MessageReceived_Event()
     {
-        private readonly IKafkaReaderFactory readerFactory = Substitute.For<IKafkaReaderFactory>();
+        //arrange
+        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
+        var routingLogger = Substitute.For<ILogger>();
+        var routeReader = new KafkaRouteReader(this.readerFactory, configurationProvider, routingLogger);
+        var listenMessageReceived = false;
+        const string TopicName = "test";
+        var kafkaRoute = new KafkaRoute(TopicName, TopicName);
+        var reader = Substitute.For<IKafkaReader>();
 
-        [Fact]
-        public void Raise_Event_On_Listener_MessageReceived_Event()
+        configurationProvider.Provide().Returns(
+            new ConsumingConfiguration(
+            [
+                new KafkaConsumingConfig(
+                    new KafkaListeningConfig(),
+                    kafkaRoute,
+                    new KafkaTopicMetaData(TopicName))
+            ]));
+        this.readerFactory.Create().Returns(reader);
+        routeReader.PacketReceived += (_, e) =>
         {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var routingLogger = Substitute.For<ILogger>();
-            var routeReader = new KafkaRouteReader(this.readerFactory, configurationProvider, routingLogger);
-            var listenMessageReceived = false;
-            const string TopicName = "test";
-            var kafkaRoute = new KafkaRoute(TopicName, TopicName);
-            var reader = Substitute.For<IKafkaReader>();
-
-            configurationProvider.Provide().Returns(
-                new ConsumingConfiguration(
-                [
-                    new KafkaConsumingConfig(
-                        new KafkaListeningConfig(),
-                        kafkaRoute,
-                        new KafkaTopicMetaData(TopicName))
-                ]));
-            this.readerFactory.Create().Returns(reader);
-            routeReader.PacketReceived += (_, e) =>
+            if (e.Route == kafkaRoute.Name)
             {
-                if (e.Route == kafkaRoute.Name)
-                {
-                    listenMessageReceived = true;
-                }
-            };
+                listenMessageReceived = true;
+            }
+        };
 
-            reader.When(i => i.StartListening(kafkaRoute)).Do(
-                _ => reader.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(
-                    this,
-                    new RoutingDataPacket(
-                        [
-                            1, 2, 3
-                        ],
-                        kafkaRoute.Name)));
+        reader.When(i => i.StartListening(kafkaRoute)).Do(
+            _ => reader.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(
+                this,
+                new RoutingDataPacket(
+                    [
+                        1, 2, 3
+                    ],
+                    kafkaRoute.Name,
+                    DateTime.UtcNow)));
 
-            //act
-            routeReader.StartReading();
+        //act
+        routeReader.StartReading();
 
-            //assert
-            listenMessageReceived.Should().BeTrue();
-        }
+        //assert
+        listenMessageReceived.Should().BeTrue();
     }
 }

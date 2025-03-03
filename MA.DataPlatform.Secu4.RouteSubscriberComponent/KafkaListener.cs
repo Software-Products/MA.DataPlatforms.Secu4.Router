@@ -49,10 +49,15 @@ public class KafkaListener : KafkaConsumer, IKafkaListener
             while (!token.IsCancellationRequested)
             {
                 var consumeResult = this.Consumer.Consume(token);
-                this.OnMessagedReceived(new RoutingDataPacket(consumeResult.Message.Value, this.Route.Name, consumeResult.Message.Key));
+                this.OnMessagedReceived(
+                    new RoutingDataPacket(consumeResult.Message.Value, this.Route.Name, consumeResult.Message.Timestamp.UtcDateTime, consumeResult.Message.Key));
             }
 
             this.Consumer.Unassign();
+        }
+        catch (OperationCanceledException)
+        {
+            this.logger.Warning($"The {this.Route.Name} Listener Stopped");
         }
         catch (Exception ex)
         {

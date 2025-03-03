@@ -47,7 +47,7 @@ public class KafkaProducerHolderShould
         routingConfigurationProvider.Provide().Returns(new RoutingConfiguration(new KafkaRoutingConfig(new KafkaPublishingConfig(), [], [], DeadLetterTopic)));
         this.kafkaProducerHolder = new KafkaProducerHolder(this.routeRepository, this.routeManager, this.producer, routingConfigurationProvider);
 
-        this.routingDataPacket = new RoutingDataPacket([], Route);
+        this.routingDataPacket = new RoutingDataPacket([], Route, DateTime.UtcNow);
     }
 
     [Fact]

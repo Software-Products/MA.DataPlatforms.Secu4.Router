@@ -63,7 +63,8 @@ public class KafkaReader : KafkaConsumer, IKafkaReader
                 var consumeResult = this.Consumer.Consume(token);
 
                 Interlocked.Add(ref this.messageCounter, 1);
-                this.OnMessagedReceived(new RoutingDataPacket(consumeResult.Message.Value, this.Route.Name, consumeResult.Message.Key));
+                this.OnMessagedReceived(
+                    new RoutingDataPacket(consumeResult.Message.Value, this.Route.Name, consumeResult.Message.Timestamp.UtcDateTime, consumeResult.Message.Key));
 
                 if (consumeResult.Offset < offsetDictionary[consumeResult.Partition.Value] - 1)
                 {
@@ -76,6 +77,10 @@ public class KafkaReader : KafkaConsumer, IKafkaReader
 
             this.ReadingCompleted?.Invoke(this, new ReadingCompletedEventArgs(this.Route.Name, DateTime.Now, this.messageCounter));
             this.Consumer.Unassign();
+        }
+        catch (OperationCanceledException)
+        {
+            this.logger.Warning($"The {this.Route.Name} Listener Stopped");
         }
         catch (Exception ex)
         {

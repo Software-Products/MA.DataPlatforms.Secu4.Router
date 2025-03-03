@@ -60,7 +60,7 @@ public class KafkaBrokerPublishersShould
     {
         //arrange done in constructor
         var kafkaBrokerPublisher = new KafkaBrokerPublisher(this.logger, this.kafkaProducerHolder);
-        var data = new RoutingDataPacket([], "test");
+        var data = new RoutingDataPacket([], "test", DateTime.UtcNow);
 
         //act
         kafkaBrokerPublisher.Publish(data);
