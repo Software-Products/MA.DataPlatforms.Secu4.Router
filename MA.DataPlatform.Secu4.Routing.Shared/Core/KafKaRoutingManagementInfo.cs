@@ -1,4 +1,4 @@
-// <copyright file="IRouteManager.cs" company="McLaren Applied Ltd.">
+// <copyright file="KafKaRoutingManagementInfo.cs" company="McLaren Applied Ltd.">
 //
 // Copyright 2024 McLaren Applied Ltd
 // 
@@ -15,11 +15,22 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatforms.Secu4.Routing.Shared.Core;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 
-namespace MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
-public interface IRouteManager
+public class KafkaRoutingManagementInfo
 {
-    public void CheckRoutes(KafkaRoutingManagementInfo routingManagementInfo);
+    public KafkaRoutingManagementInfo(string url, IReadOnlyList<KafkaRoute> routes, IReadOnlyList<KafkaTopicMetaData> metaData)
+    {
+        this.Url = url;
+        this.Routes = routes;
+        this.MetaData = metaData;
+    }
+
+    public string Url { get; }
+
+    public IReadOnlyList<KafkaRoute> Routes { get; }
+
+    public IReadOnlyList<KafkaTopicMetaData> MetaData { get; }
 }

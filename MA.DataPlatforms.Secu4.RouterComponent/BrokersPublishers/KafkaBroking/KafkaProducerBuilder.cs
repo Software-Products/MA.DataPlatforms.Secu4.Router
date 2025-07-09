@@ -20,6 +20,7 @@ using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking.Producing;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
@@ -28,13 +29,16 @@ public class KafkaProducerBuilder : IKafkaProducerHolderBuilder
 {
     private readonly ILogger logger;
     private readonly IRoutingConfigurationProvider routingConfigurationProvider;
+    private readonly IRouteManager routeManager;
 
     public KafkaProducerBuilder(
         ILogger logger,
-        IRoutingConfigurationProvider routingConfigurationProvider)
+        IRoutingConfigurationProvider routingConfigurationProvider,
+        IRouteManager routeManager)
     {
         this.logger = logger;
         this.routingConfigurationProvider = routingConfigurationProvider;
+        this.routeManager = routeManager;
     }
 
     public IKafkaProducerHolder Build()
@@ -46,17 +50,10 @@ public class KafkaProducerBuilder : IKafkaProducerHolderBuilder
 
         var kafkaTopicsMetaData = config.KafkaRoutingConfig.RoutesMetaData;
         kafkaTopicsMetaData.Add(new KafkaTopicMetaData(config.KafkaRoutingConfig.DeadLetterTopic));
-        var kafkaTopicMetaDataRepository = new KafkaTopicMetaDataRepository(kafkaTopicsMetaData);
-
-        var brokerUrl = this.routingConfigurationProvider.Provide().KafkaRoutingConfig.KafkaPublishingConfig.Server;
 
         return new KafkaProducerHolder(
             kafkaRouteRepository,
-            new KafkaRouteManager(
-                this.logger,
-                new KafkaBrokerUrlProvider(brokerUrl),
-                kafkaRouteRepository,
-                kafkaTopicMetaDataRepository),
+            this.routeManager,
             new KafkaProducer(this.logger, this.routingConfigurationProvider),
             this.routingConfigurationProvider);
     }

@@ -17,6 +17,8 @@
 
 using System.Collections.Concurrent;
 
+using Confluent.Kafka;
+
 using FluentAssertions;
 
 using MA.Common.Abstractions;
@@ -25,6 +27,7 @@ using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Base;
 using MA.DataPlatforms.Secu4.RouterComponent.IntegrationTest.Kafka.Helper;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 using NSubstitute;
 
@@ -43,6 +46,7 @@ public class RouterEndToEndTests
     public RouterEndToEndTests(RunKafkaDockerComposeFixture dockerComposeFixture)
     {
         this.DockerComposeFixture = dockerComposeFixture;
+        Task.Delay(TimeSpan.FromMilliseconds(5000)).Wait();
     }
 
     public RunKafkaDockerComposeFixture DockerComposeFixture { get; }
@@ -71,7 +75,8 @@ public class RouterEndToEndTests
             logger,
             new KafkaProducerBuilder(
                 logger,
-                routingConfigurationProvider));
+                routingConfigurationProvider,
+                new KafkaRouteManager(logger)));
 
         using var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
@@ -114,9 +119,9 @@ public class RouterEndToEndTests
         _ = Task.Run(() => listener3.Start(), token);
 
         //assert
-        autoResetEvent1.WaitOne();
-        autoResetEvent2.WaitOne();
-        autoResetEvent3.WaitOne();
+        autoResetEvent1.WaitOne(60000);
+        autoResetEvent2.WaitOne(60000);
+        autoResetEvent3.WaitOne(60000);
 
         this.results[route1.Topic].Should().NotBeNull().And.HaveCount(20).And.ContainInOrder(data1).And.ContainItemsAssignableTo<byte>();
         this.results[route2.Topic].Should().NotBeNull().And.HaveCount(20).And.ContainInOrder(data2).And.ContainItemsAssignableTo<byte>();
@@ -147,7 +152,8 @@ public class RouterEndToEndTests
             logger,
             new KafkaProducerBuilder(
                 logger,
-                routingConfigurationProvider));
+                routingConfigurationProvider,
+                new KafkaRouteManager(logger)));
 
         using var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
@@ -178,7 +184,7 @@ public class RouterEndToEndTests
 
         // act
         router.Route(new RoutingDataPacket(data1, route1.Name, DateTime.UtcNow, Key1));
-        router.Route(new RoutingDataPacket(data2, route2.Name, DateTime.UtcNow,Key2));
+        router.Route(new RoutingDataPacket(data2, route2.Name, DateTime.UtcNow, Key2));
         router.Route(new RoutingDataPacket(data3, route3.Name, DateTime.UtcNow, Key3));
 
         var listener1 = CreateListener(route1.Topic, token);
@@ -194,9 +200,9 @@ public class RouterEndToEndTests
         _ = Task.Run(() => listener3.Start(), token);
 
         //assert
-        autoResetEvent1.WaitOne();
-        autoResetEvent2.WaitOne();
-        autoResetEvent3.WaitOne();
+        autoResetEvent1.WaitOne(60000);
+        autoResetEvent2.WaitOne(60000);
+        autoResetEvent3.WaitOne(60000);
 
         this.results[route1.Topic].Should().NotBeNull().And.HaveCount(20).And.ContainInOrder(data1).And.ContainItemsAssignableTo<byte>();
         this.results[route2.Topic].Should().NotBeNull().And.HaveCount(20).And.ContainInOrder(data2).And.ContainItemsAssignableTo<byte>();
@@ -227,7 +233,8 @@ public class RouterEndToEndTests
             logger,
             new KafkaProducerBuilder(
                 logger,
-                routingConfigurationProvider));
+                routingConfigurationProvider,
+                new KafkaRouteManager(logger)));
 
         using var cancellationTokenSource = new CancellationTokenSource();
         var token = cancellationTokenSource.Token;
@@ -248,18 +255,125 @@ public class RouterEndToEndTests
         _ = Task.Run(() => listener1.Start(), token);
 
         //assert
-        autoResetEvent1.WaitOne();
+        autoResetEvent1.WaitOne(10000);
         this.results[DeadLetterTopic].Should().NotBeNull().And.HaveCount(20).And.ContainInOrder(data1).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[DeadLetterTopic].Should().Be($"_{route1.Name}:_{Key1}");
     }
 
+    [Fact]
+    public void Kafka_Route_Manager_Should_Work_Concurrently()
+    {
+        //arrange
+        var logger = Substitute.For<ILogger>();
+        var routingInfo = Enumerable.Range(1, 30).Select(i => new KafkaRoutingManagementInfo(
+            Server,
+            [
+                new KafkaRoute($"route{i}", $"route_{i}_topic{i}")
+            ],
+            [])).ToList();
+
+        var routeManager = new KafkaRouteManager(logger);
+        // act
+        var lstTask = new List<Task>();
+        for (var i = 0; i < 30; i++)
+        {
+            var kafKaRoutingManagementInfo = routingInfo[i];
+            lstTask.Add(
+                Task.Run(() =>
+                {
+                    routeManager.CheckRoutes(kafKaRoutingManagementInfo);
+                }));
+        }
+
+        Task.WaitAll([.. lstTask]);
+        // act
+        lstTask = [];
+        for (var i = 0; i < 30; i++)
+        {
+            var kafKaRoutingManagementInfo = routingInfo[i];
+            lstTask.Add(
+                Task.Run(() =>
+                {
+                    routeManager.CheckRoutes(kafKaRoutingManagementInfo);
+                }));
+        }
+
+        Task.WaitAll([.. lstTask]);
+
+        var adminConfig = new AdminClientConfig
+        {
+            BootstrapServers = Server
+        };
+        var adminClient = new AdminClientBuilder(adminConfig).Build();
+
+        var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(3));
+        foreach (var kafKaRoutingManagementInfo in routingInfo)
+        {
+            Assert.Contains(kafKaRoutingManagementInfo.Routes[0].Topic, metadata.Topics.Select(i => i.Topic));
+        }
+    }
+
+    [Fact]
+    public void Kafka_Route_Manager_Should_Create_Route_When_SomeRoute_exist_Some_HaveTo_Create()
+    {
+        //arrange
+        var logger = Substitute.For<ILogger>();
+        var routingManagementInfo1 = new KafkaRoutingManagementInfo(
+            Server,
+            [new KafkaRoute("sample_route_1", "sample_route_1_topic1")],
+            [new KafkaTopicMetaData("sample_route_1_topic1", 3)]);
+
+        var routingManagementInfo2 = new KafkaRoutingManagementInfo(
+            Server,
+            [
+                new KafkaRoute("sample_route_1", "sample_route_1_topic1"),
+                new KafkaRoute("sample_route_2", "sample_route_2_topic2"),
+                new KafkaRoute("sample_route_3", "sample_route_3_topic3")
+            ],
+            [
+                new KafkaTopicMetaData("sample_route_1_topic1", 1),
+                new KafkaTopicMetaData("sample_route_2_topic2", 2),
+                new KafkaTopicMetaData("sample_route_3_topic3", 3),
+            ]);
+        var adminConfig = new AdminClientConfig
+        {
+            BootstrapServers = Server
+        };
+        var adminClient = new AdminClientBuilder(adminConfig).Build();
+
+        var routeManager = new KafkaRouteManager(logger);
+
+        // act
+        routeManager.CheckRoutes(routingManagementInfo1);
+      
+        //assert
+        var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(3));
+        var found = metadata.Topics.FirstOrDefault(i => i.Topic == "sample_route_1_topic1");
+        found.Should().NotBeNull();
+        found?.Partitions.Count.Should().Be(3);
+
+        // act
+        routeManager.CheckRoutes(routingManagementInfo2);
+
+        //assert
+        metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(3));
+        found = metadata.Topics.FirstOrDefault(i => i.Topic == "sample_route_2_topic2");
+        found.Should().NotBeNull();
+        found?.Partitions.Count.Should().Be(2);
+
+        found = metadata.Topics.FirstOrDefault(i => i.Topic == "sample_route_3_topic3");
+        found.Should().NotBeNull();
+        found?.Partitions.Count.Should().Be(3);
+    }
+
     private static KafkaHelperListener<string?, byte[]> CreateListener(string topicName, CancellationToken token)
-        => new(Server, topicName, token);
+    {
+        return new KafkaHelperListener<string?, byte[]>(Server, topicName, token);
+    }
 
     private void KafkaListener_OnReceived(object? sender, MessageReceived<string?, byte[]> e)
     {
         AddDataToDictionary(this.results, e.Topic, e.Data);
-        this.autoResetEvents[e.Topic].Set();
         this.resultKeys.Add(e.Topic, e.Key);
         this.autoResetEvents[e.Topic].Set();
     }

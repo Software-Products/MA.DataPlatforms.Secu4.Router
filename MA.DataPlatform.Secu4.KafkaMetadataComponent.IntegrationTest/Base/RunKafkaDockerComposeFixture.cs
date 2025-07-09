@@ -53,7 +53,7 @@ public class RunKafkaDockerComposeFixture : IAsyncLifetime
     {
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
-            await Task.Delay(15000);
+            await Task.Delay(20000);
             return;
         }
 

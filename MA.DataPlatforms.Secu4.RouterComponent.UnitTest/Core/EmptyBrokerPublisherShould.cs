@@ -54,7 +54,7 @@ public class EmptyBrokerPublisherShould
         //arrange done in ctor
 
         //act
-        this.emptyBrokerPublisher.Publish(new RoutingDataPacket(Array.Empty<byte>(), "", DateTime.UtcNow));
+        this.emptyBrokerPublisher.Publish(new RoutingDataPacket([], "", DateTime.UtcNow));
 
         //assert
         this.logger.Received(1).Debug("the empty broker published data");

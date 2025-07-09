@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>12.0</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
-    <ProjectReference Include="..\MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatforms.Secu4.RouterComponent.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
+		<ProjectReference Include="..\MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatforms.Secu4.RouterComponent.csproj" />
+	</ItemGroup>
 
 </Project>

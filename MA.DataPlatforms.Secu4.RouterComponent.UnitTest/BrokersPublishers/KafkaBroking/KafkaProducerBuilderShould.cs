@@ -22,6 +22,7 @@ using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking.Producing;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
@@ -33,13 +34,15 @@ public class KafkaProducerBuilderShould
 {
     private readonly IRoutingConfigurationProvider routingConfigurationProvider;
     private readonly KafkaProducerBuilder kafkaProducerBuilder;
+    private readonly IRouteManager routeManager;
 
     public KafkaProducerBuilderShould()
     {
         var routerLogger = Substitute.For<ILogger>();
 
         this.routingConfigurationProvider = Substitute.For<IRoutingConfigurationProvider>();
-        this.kafkaProducerBuilder = new KafkaProducerBuilder(routerLogger, this.routingConfigurationProvider);
+        this.routeManager = Substitute.For<IRouteManager>();
+        this.kafkaProducerBuilder = new KafkaProducerBuilder(routerLogger, this.routingConfigurationProvider, this.routeManager);
     }
 
     [Fact]

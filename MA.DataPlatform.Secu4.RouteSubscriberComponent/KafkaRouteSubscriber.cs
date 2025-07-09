@@ -15,7 +15,6 @@
 // limitations under the License.
 // </copyright>
 
-using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
@@ -27,41 +26,30 @@ public class KafkaRouteSubscriber : IRouteSubscriber
 {
     private readonly IKafkaListenerFactory kafkaListenerFactory;
     private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
-    private readonly ILogger logger;
-    private readonly List<IKafkaListener> kafkaListeners = new();
+    private readonly IRouteManager routeManager;
+    private readonly List<IKafkaListener> kafkaListeners = [];
 
-    public KafkaRouteSubscriber(IKafkaListenerFactory kafkaListenerFactory, IConsumingConfigurationProvider consumingConfigurationProvider, ILogger logger)
+    public KafkaRouteSubscriber(
+        IKafkaListenerFactory kafkaListenerFactory,
+        IConsumingConfigurationProvider consumingConfigurationProvider,
+        IRouteManager routeManager)
     {
         this.kafkaListenerFactory = kafkaListenerFactory;
         this.consumingConfigurationProvider = consumingConfigurationProvider;
-        this.logger = logger;
+        this.routeManager = routeManager;
     }
 
     public event EventHandler<RoutingDataPacket>? PacketReceived;
 
     public void Subscribe()
     {
-        var config = this.consumingConfigurationProvider.Provide();
-
-        var brokersConfig = config.KafkaConsumingConfigs.Select(
-            i => new
-            {
-                i.KafkaListeningConfig.Server,
-                i.KafkaRoutes,
-                i.RoutesMetaData
-            }).GroupBy(i => i.Server).ToList();
-
-        foreach (var kafkaRouteManager in brokersConfig.Select(
-                     groupItem => new KafkaRouteManager(
-                         this.logger,
-                         new KafkaBrokerUrlProvider(groupItem.Key),
-                         new KafkaRouteRepository(groupItem.Select(i => i.KafkaRoutes)),
-                         new KafkaTopicMetaDataRepository(groupItem.Select(i => i.RoutesMetaData)))))
+        var kaRoutingManagementInfos = new Utility(this.consumingConfigurationProvider).CreateRouteManagementInfo();
+        foreach (var kaRoutingManagementInfo in kaRoutingManagementInfos)
         {
-            kafkaRouteManager.CheckRoutes();
+            this.routeManager.CheckRoutes(kaRoutingManagementInfo);
         }
 
-        var routes = config.KafkaConsumingConfigs.Select(i => i.KafkaRoutes).ToList();
+        var routes = kaRoutingManagementInfos.SelectMany(i => i.Routes).ToList();
         foreach (var kafkaRoute in routes)
         {
             var kafkaListener = this.kafkaListenerFactory.Create();

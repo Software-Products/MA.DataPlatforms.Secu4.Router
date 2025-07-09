@@ -20,72 +20,82 @@ using Confluent.Kafka.Admin;
 
 using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
-using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 public class KafkaRouteManager : IRouteManager
 {
+    private readonly Dictionary<string, IAdminClient> adminClients = new();
+    private readonly HashSet<(string Url, string Topic)> processedTopic = [];
+
     private readonly ILogger logger;
-    private readonly IBrokerUrlProvider brokerUrlProvider;
-    private readonly IKafkaRouteRepository kafkaRouteRepository;
-    private readonly IKafkaTopicMetaDataRepository kafkaTopicMetaDataRepository;
 
-    private IAdminClient? adminClient;
-
-    public KafkaRouteManager(
-        ILogger logger,
-        IBrokerUrlProvider brokerUrlProvider,
-        IKafkaRouteRepository kafkaRouteRepository,
-        IKafkaTopicMetaDataRepository kafkaTopicMetaDataRepository)
+    public KafkaRouteManager(ILogger logger)
     {
         this.logger = logger;
-        this.brokerUrlProvider = brokerUrlProvider;
-        this.kafkaRouteRepository = kafkaRouteRepository;
-        this.kafkaTopicMetaDataRepository = kafkaTopicMetaDataRepository;
     }
 
-    public void CheckRoutes()
+    public void CheckRoutes(KafkaRoutingManagementInfo routingManagementInfo)
     {
-        var adminConfig = new AdminClientConfig
-        {
-            BootstrapServers = this.brokerUrlProvider.Provide()
-        };
-        this.adminClient = new AdminClientBuilder(adminConfig).Build();
-        var kafkaRouteMetaData = this.kafkaTopicMetaDataRepository.GetAllMetaData().ToList();
-        var kafkaRoutes = this.kafkaRouteRepository.GetRoutes().Cast<IKafkaRoute>().ToList();
+        var autoResetEvent = new AutoResetEvent(false);
+        Task.Run(() => this.StartChecking(routingManagementInfo, autoResetEvent));
+        autoResetEvent.WaitOne();
+    }
 
-        var configRouteInfos = kafkaRoutes.GroupJoin(
-            kafkaRouteMetaData,
-            router => router.Topic,
-            metaData => metaData.Topic,
-            (o, i) => new KafkaConfigRouteInfo(o, i.ToList())).ToList();
-
-        this.ValidateConfigs(configRouteInfos);
+    private async Task StartChecking(KafkaRoutingManagementInfo routingManagementInfo, AutoResetEvent autoResetEvent)
+    {
         try
         {
-            var topicMetadata = this.adminClient?.GetMetadata(TimeSpan.FromSeconds(5));
+            if (!this.adminClients.TryGetValue(routingManagementInfo.Url, out var adminClient))
+            {
+                var adminConfig = new AdminClientConfig
+                {
+                    BootstrapServers = routingManagementInfo.Url
+                };
+                adminClient = new AdminClientBuilder(adminConfig).Build();
+                this.adminClients.Add(routingManagementInfo.Url, adminClient);
+            }
+
+            var configRouteInfos = routingManagementInfo.Routes.GroupJoin(
+                routingManagementInfo.MetaData,
+                router => router.Topic,
+                metaData => metaData.Topic,
+                (o, i) => new KafkaConfigRouteInfo(o, i.ToList())).ToList();
+
+            this.ValidateConfigs(configRouteInfos);
             foreach (var configuredRoute in configRouteInfos)
             {
-                var foundInfo = topicMetadata?.Topics.Find(t => t.Topic.Equals(configuredRoute.Route.Name));
+                if (this.processedTopic.Contains((routingManagementInfo.Url, configuredRoute.Route.Topic)))
+                {
+                    continue;
+                }
+
+                var metadata = this.adminClients[routingManagementInfo.Url].GetMetadata(TimeSpan.FromSeconds(3));
+                var foundInfo = metadata.Topics.FirstOrDefault(i => i.Topic == configuredRoute.Route.Topic);
                 if (foundInfo is not null)
                 {
                     this.CheckConsistency(foundInfo, configuredRoute);
                 }
                 else
                 {
-                    this.CreateTopic(configuredRoute);
+                    await this.CreateTopic(routingManagementInfo.Url, configuredRoute);
                 }
+
+                this.processedTopic.Add((routingManagementInfo.Url, configuredRoute.Route.Topic));
             }
         }
         catch (Exception ex)
         {
             this.logger.Error(ex.ToString());
         }
+        finally
+        {
+            autoResetEvent.Set();
+        }
     }
 
-    private void CreateTopic(KafkaConfigRouteInfo kafkaConfigRouteInfo)
+    private async Task CreateTopic(string url, KafkaConfigRouteInfo kafkaConfigRouteInfo)
     {
         try
         {
@@ -96,17 +106,17 @@ public class KafkaRouteManager : IRouteManager
                 NumPartitions = kafkaTopicMetaData.NumberOfPartitions ?? -1,
                 ReplicationFactor = kafkaTopicMetaData.ReplicationFactor ?? -1
             };
-            this.adminClient?.CreateTopicsAsync(
-                new[]
-                {
-                    topicSpecification
-                }).Wait();
+
+            await this.adminClients[url].CreateTopicsAsync(
+            [
+                topicSpecification
+            ]);
         }
-        catch (AggregateException ex)
+        catch (Exception ex)
         {
-            if (ex.InnerException?.Message.Contains("already exists") ?? false)
+            if (ex.Message.Contains("already exists"))
             {
-                this.logger.Warning($"topic {kafkaConfigRouteInfo.Route.Topic} already exist");
+                this.logger.Info($"topic {kafkaConfigRouteInfo.Route.Topic} already exist");
             }
             else
             {
@@ -115,7 +125,7 @@ public class KafkaRouteManager : IRouteManager
         }
     }
 
-    private void ValidateConfigs(IReadOnlyCollection<KafkaConfigRouteInfo> joinedTopicInfo)
+    private void ValidateConfigs(IReadOnlyList<KafkaConfigRouteInfo> joinedTopicInfo)
     {
         foreach (var inconsistentDataInNumber in joinedTopicInfo.Where(i => i.MetaData.Count > 1))
         {
@@ -148,7 +158,7 @@ public class KafkaRouteManager : IRouteManager
         var replicasLength = foundInfo.Partitions[0].Replicas.Length;
         if ((configRouteInfo.MetaData[0].ReplicationFactor ?? 1) != replicasLength)
         {
-            this.logger.Warning(
+            this.logger.Info(
                 $"The replication factor for topic:{configRouteInfo.Route.Topic} is not based on expectation. expected:{configRouteInfo.MetaData[0].ReplicationFactor ?? 1} actual:{replicasLength}");
         }
     }

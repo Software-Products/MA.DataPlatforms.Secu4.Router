@@ -19,6 +19,7 @@ using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 
@@ -27,6 +28,7 @@ public sealed class KafkaProducerHolder : IKafkaProducerHolder
     private readonly IRouteRepository routeRepository;
     private readonly IRouteManager routeManager;
     private readonly string deadLetterTopicName;
+    private readonly RoutingConfiguration routingConfiguration;
 
     public KafkaProducerHolder(
         IRouteRepository routeRepository,
@@ -37,7 +39,8 @@ public sealed class KafkaProducerHolder : IKafkaProducerHolder
         this.routeRepository = routeRepository;
         this.routeManager = routeManager;
         this.Producer = producer;
-        this.deadLetterTopicName = routingConfigurationProvider.Provide().KafkaRoutingConfig.DeadLetterTopic;
+        this.routingConfiguration = routingConfigurationProvider.Provide();
+        this.deadLetterTopicName = this.routingConfiguration.KafkaRoutingConfig.DeadLetterTopic;
     }
 
     public IKafkaProducer Producer { get; }
@@ -49,7 +52,16 @@ public sealed class KafkaProducerHolder : IKafkaProducerHolder
 
     public void Initiate()
     {
-        this.routeManager.CheckRoutes();
+        List<KafkaRoute> routes =
+        [
+            .. this.routingConfiguration.KafkaRoutingConfig.KafkaRoutes,
+            new(this.deadLetterTopicName, this.deadLetterTopicName)
+        ];
+        var kafkaRouteManagementInfo = new KafkaRoutingManagementInfo(
+            this.routingConfiguration.KafkaRoutingConfig.KafkaPublishingConfig.Server,
+            routes,
+            this.routingConfiguration.KafkaRoutingConfig.RoutesMetaData);
+        this.routeManager.CheckRoutes(kafkaRouteManagementInfo);
         this.Producer.Initiate();
     }
 
