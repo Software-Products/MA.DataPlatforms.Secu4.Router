@@ -63,5 +63,9 @@ public class KafkaListener : KafkaConsumer, IKafkaListener
         {
             this.logger.Error(ex.ToString());
         }
+        finally
+        {
+            this.Consumer?.Dispose();
+        }
     }
 }

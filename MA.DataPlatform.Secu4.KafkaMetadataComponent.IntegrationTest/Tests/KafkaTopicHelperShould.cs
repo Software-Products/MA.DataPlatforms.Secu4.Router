@@ -399,7 +399,7 @@ public class KafkaTopicHelperShould
         var result = topicHelper.GetInfoByTopicContains(Server, string.Empty);
 
         //assert
-        result = [.. result.Where(i=> lstTopicNames.Contains(i.TopicName)).OrderBy(i => i.TopicName).ThenBy(i => i.Partition)];
+        result = [.. result.Where(i => lstTopicNames.Contains(i.TopicName)).OrderBy(i => i.TopicName).ThenBy(i => i.Partition)];
         result.Count.Should().Be(7);
 
         result[0].TopicName.Should().Be(topic1);

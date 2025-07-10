@@ -21,6 +21,7 @@ using MA.Common;
 using MA.DataPlatforms.Secu4.RouterComponent;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.Routing.Profiling;
 
@@ -33,8 +34,8 @@ internal class RouterTester
     public RouterTester(int numberOfMessages, int sizeOfContent)
     {
         var logger = new ConsoleLogger();
-        this.router = new Router(logger, new KafkaProducerBuilder(logger, new RoutingConfigurationProvider()));
-        this.lstMessages = new List<RoutingDataPacket>();
+        this.router = new Router(logger, new KafkaProducerBuilder(logger, new RoutingConfigurationProvider(), new KafkaRouteManager(logger)));
+        this.lstMessages = [];
         var rnd = new Random();
 
         for (var i = 0; i < numberOfMessages; i++)

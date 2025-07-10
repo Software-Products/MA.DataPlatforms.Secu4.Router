@@ -8,7 +8,7 @@ services:
       - 12183:2181   
   
   route_reader_integration_test_kafka_server:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.9.1
     depends_on:
       - route_reader_integration_test_zookeeper
     ports:

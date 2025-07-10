@@ -17,120 +17,121 @@
 
 using FluentAssertions;
 
-using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests;
+
+public class KafkaRouteSubscriberShould
 {
-    public class KafkaRouteSubscriberShould
+    private readonly IKafkaListenerFactory listenerFactory = Substitute.For<IKafkaListenerFactory>();
+
+    [Fact]
+    public void Raise_Event_On_Listener_MessageReceived_Event()
     {
-        private readonly IKafkaListenerFactory listenerFactory = Substitute.For<IKafkaListenerFactory>();
+        //arrange
+        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
 
-        [Fact]
-        public void Raise_Event_On_Listener_MessageReceived_Event()
+        var routeManager = Substitute.For<IRouteManager>();
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        var listenMessageReceived = false;
+        const string TopicName = "test";
+        var kafkaRoute = new KafkaRoute(TopicName, TopicName);
+        var listener = Substitute.For<IKafkaListener>();
+
+        configurationProvider.Provide().Returns(
+            new ConsumingConfiguration(
+            [
+                new KafkaConsumingConfig(
+                    new KafkaListeningConfig(),
+                    kafkaRoute,
+                    new KafkaTopicMetaData(TopicName))
+            ]));
+        this.listenerFactory.Create().Returns(listener);
+        subscriber.PacketReceived += (_, e) =>
         {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var routingLogger = Substitute.For<ILogger>();
-            var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routingLogger);
-            var listenMessageReceived = false;
-            const string TopicName = "test";
-            var kafkaRoute = new KafkaRoute(TopicName, TopicName);
-            var listener = Substitute.For<IKafkaListener>();
-
-            configurationProvider.Provide().Returns(
-                new ConsumingConfiguration(
-                [
-                    new KafkaConsumingConfig(
-                        new KafkaListeningConfig(),
-                        kafkaRoute,
-                        new KafkaTopicMetaData(TopicName))
-                ]));
-            this.listenerFactory.Create().Returns(listener);
-            subscriber.PacketReceived += (_, e) =>
+            if (e.Route == kafkaRoute.Name)
             {
-                if (e.Route == kafkaRoute.Name)
-                {
-                    listenMessageReceived = true;
-                }
-            };
+                listenMessageReceived = true;
+            }
+        };
 
-            listener.When(i => i.StartListening(kafkaRoute)).Do(
-                _ => listener.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(
-                    this,
-                    new RoutingDataPacket(
-                        [
-                            1, 2, 3
-                        ],
-                        kafkaRoute.Name,
-                        DateTime.UtcNow)));
+        listener.When(i => i.StartListening(kafkaRoute)).Do(
+            _ => listener.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(
+                this,
+                new RoutingDataPacket(
+                    [
+                        1, 2, 3
+                    ],
+                    kafkaRoute.Name,
+                    DateTime.UtcNow)));
 
-            //act
-            subscriber.Subscribe();
+        //act
+        subscriber.Subscribe();
 
-            //assert
-            listenMessageReceived.Should().BeTrue();
-        }
+        //assert
+        listenMessageReceived.Should().BeTrue();
+    }
 
-        [Fact]
-        public void Call_Listener_Stop_On_Unsubscribe()
-        {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var routingLogger = Substitute.For<ILogger>();
-            var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routingLogger);
-            const string TopicName = "test";
-            var kafkaRoute = new KafkaRoute(TopicName, TopicName);
-            var listener = Substitute.For<IKafkaListener>();
+    [Fact]
+    public void Call_Listener_Stop_On_Unsubscribe()
+    {
+        //arrange
+        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
 
-            configurationProvider.Provide().Returns(
-                new ConsumingConfiguration(
-                [
-                    new KafkaConsumingConfig(
-                        new KafkaListeningConfig(),
-                        kafkaRoute,
-                        new KafkaTopicMetaData(TopicName))
-                ]));
-            this.listenerFactory.Create().Returns(listener);
-            subscriber.Subscribe();
+        var routeManager = Substitute.For<IRouteManager>();
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        const string TopicName = "test";
+        var kafkaRoute = new KafkaRoute(TopicName, TopicName);
+        var listener = Substitute.For<IKafkaListener>();
 
-            //act
-            subscriber.Unsubscribe();
+        configurationProvider.Provide().Returns(
+            new ConsumingConfiguration(
+            [
+                new KafkaConsumingConfig(
+                    new KafkaListeningConfig(),
+                    kafkaRoute,
+                    new KafkaTopicMetaData(TopicName))
+            ]));
+        this.listenerFactory.Create().Returns(listener);
+        subscriber.Subscribe();
 
-            //assert
-            listener.Received(1).Stop();
-        }
+        //act
+        subscriber.Unsubscribe();
 
-        [Fact]
-        public void Not_Call_Listener_Stop_On_Unsubscribe_When_Not_Subscribed()
-        {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var routingLogger = Substitute.For<ILogger>();
-            var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routingLogger);
-            const string TopicName = "test";
-            var kafkaRoute = new KafkaRoute(TopicName, TopicName);
-            var listener = Substitute.For<IKafkaListener>();
+        //assert
+        listener.Received(1).Stop();
+    }
 
-            configurationProvider.Provide().Returns(
-                new ConsumingConfiguration(
-                [
-                    new KafkaConsumingConfig(
-                        new KafkaListeningConfig(),
-                        kafkaRoute,
-                        new KafkaTopicMetaData(TopicName))
-                ]));
-            this.listenerFactory.Create().Returns(listener);
+    [Fact]
+    public void Not_Call_Listener_Stop_On_Unsubscribe_When_Not_Subscribed()
+    {
+        //arrange
+        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
 
-            //act
-            subscriber.Unsubscribe();
+        var routeManager = Substitute.For<IRouteManager>();
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        const string TopicName = "test";
+        var kafkaRoute = new KafkaRoute(TopicName, TopicName);
+        var listener = Substitute.For<IKafkaListener>();
 
-            //assert
-            listener.Received(0).Stop();
-        }
+        configurationProvider.Provide().Returns(
+            new ConsumingConfiguration(
+            [
+                new KafkaConsumingConfig(
+                    new KafkaListeningConfig(),
+                    kafkaRoute,
+                    new KafkaTopicMetaData(TopicName))
+            ]));
+        this.listenerFactory.Create().Returns(listener);
+
+        //act
+        subscriber.Unsubscribe();
+
+        //assert
+        listener.Received(0).Stop();
     }
 }

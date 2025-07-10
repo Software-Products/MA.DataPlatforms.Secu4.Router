@@ -17,7 +17,6 @@
 
 using FluentAssertions;
 
-using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
@@ -35,8 +34,8 @@ public class KafkaRouteReaderShould
     {
         //arrange
         var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-        var routingLogger = Substitute.For<ILogger>();
-        var routeReader = new KafkaRouteReader(this.readerFactory, configurationProvider, routingLogger);
+        var routeManager = Substitute.For<IRouteManager>();
+        var routeReader = new KafkaRouteReader(this.readerFactory, configurationProvider, routeManager);
         var listenMessageReceived = false;
         const string TopicName = "test";
         var kafkaRoute = new KafkaRoute(TopicName, TopicName);

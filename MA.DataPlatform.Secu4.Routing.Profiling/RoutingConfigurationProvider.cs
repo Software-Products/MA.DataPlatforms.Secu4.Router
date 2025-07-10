@@ -30,14 +30,8 @@ public class RoutingConfigurationProvider : IRoutingConfigurationProvider
         return new RoutingConfiguration(
             new KafkaRoutingConfig(
                 new KafkaPublishingConfig("localhost:9092", -1, 0, 0, 10_000_000, 100_000_000),
-                new List<KafkaRoute>
-                {
-                    new("test", "test")
-                },
-                new List<KafkaTopicMetaData>
-                {
-                    new("test")
-                },
+                [new KafkaRoute("test", "test")],
+                [new KafkaTopicMetaData("test")],
                 "dead-letter"));
     }
 }

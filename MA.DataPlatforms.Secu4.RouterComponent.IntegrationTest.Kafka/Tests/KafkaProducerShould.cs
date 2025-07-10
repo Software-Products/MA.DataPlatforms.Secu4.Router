@@ -37,7 +37,6 @@ public class KafkaProducerShould
 {
     private const string Server = "localhost:9092";
     private readonly KafkaProducer kafkaProducer;
-    private readonly KafkaRouteManager kafkaRouteManager;
     private readonly Dictionary<string, AutoResetEvent> autoResetEvents = [];
     private readonly Dictionary<string, byte[]?> results = [];
     private readonly Dictionary<string, string?> resultKeys = [];
@@ -45,18 +44,18 @@ public class KafkaProducerShould
     private readonly IKafkaRouteRepository kafkaRouteRepository;
 
     private readonly IRoutingConfigurationProvider routingConfigurationProvider;
+    private readonly ILogger logger;
 
     public KafkaProducerShould(RunKafkaDockerComposeFixture dockerComposeFixture)
     {
         this.DockerComposeFixture = dockerComposeFixture;
         this.routingConfigurationProvider = Substitute.For<IRoutingConfigurationProvider>();
-        var logger = Substitute.For<ILogger>();
-        this.kafkaProducer = new KafkaProducer(logger, this.routingConfigurationProvider);
+        this.logger = Substitute.For<ILogger>();
+        this.kafkaProducer = new KafkaProducer(this.logger, this.routingConfigurationProvider);
         this.kafkaRouteRepository = Substitute.For<IKafkaRouteRepository>();
-        var kafkaTopicMetaDataRepository = Substitute.For<IKafkaTopicMetaDataRepository>();
         var brokerUrlProvider = Substitute.For<IBrokerUrlProvider>();
         brokerUrlProvider.Provide().Returns(new KafkaPublishingConfig().Server);
-        this.kafkaRouteManager = new KafkaRouteManager(logger, brokerUrlProvider, this.kafkaRouteRepository, kafkaTopicMetaDataRepository);
+        Task.Delay(TimeSpan.FromMilliseconds(5000)).Wait();
     }
 
     public RunKafkaDockerComposeFixture DockerComposeFixture { get; }
@@ -65,22 +64,23 @@ public class KafkaProducerShould
     public void Producer_Produce_Data_With_key_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing()
     {
         //arrange done in ctor
-
         var topicName = Guid.NewGuid().ToString();
         var kafkaRoutes = new List<KafkaRoute>
         {
             new("test", topicName)
         };
+        List<KafkaTopicMetaData> routesMetaData = [new KafkaTopicMetaData(topicName)];
         this.routingConfigurationProvider.Provide().Returns(
             new RoutingConfiguration(
                 new KafkaRoutingConfig(
                     new KafkaPublishingConfig(),
                     kafkaRoutes,
-                    [new KafkaTopicMetaData(topicName)],
+                    routesMetaData,
                     "deadLetter")));
         this.kafkaRouteRepository.GetRoutes().Returns(kafkaRoutes);
+        var kafkaRouteManager = new KafkaRouteManager(this.logger);
+        kafkaRouteManager.CheckRoutes(new KafkaRoutingManagementInfo(Server, kafkaRoutes, routesMetaData));
         this.kafkaProducer.Initiate();
-        this.kafkaRouteManager.CheckRoutes();
         const int DataBytesLength = 20;
         var data = new byte[DataBytesLength];
         new Random().NextBytes(data);
@@ -108,22 +108,25 @@ public class KafkaProducerShould
     [Fact]
     public void Producer_Produce_Data_Without_Key_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing()
     {
+        Task.Delay(TimeSpan.FromMilliseconds(5000)).Wait();
         //arrange done in ctor
         var topicName = Guid.NewGuid().ToString();
         var kafkaRoutes = new List<KafkaRoute>
         {
             new("test", topicName)
         };
+        List<KafkaTopicMetaData> routesMetaData = [new KafkaTopicMetaData(topicName)];
         this.routingConfigurationProvider.Provide().Returns(
             new RoutingConfiguration(
                 new KafkaRoutingConfig(
                     new KafkaPublishingConfig(),
                     kafkaRoutes,
-                    [new KafkaTopicMetaData(topicName)],
+                    routesMetaData,
                     "deadLetter")));
+        var kafkaRouteManager = new KafkaRouteManager(this.logger);
+        kafkaRouteManager.CheckRoutes(new KafkaRoutingManagementInfo(Server, kafkaRoutes, routesMetaData));
         this.kafkaRouteRepository.GetRoutes().Returns(kafkaRoutes);
         this.kafkaProducer.Initiate();
-        this.kafkaRouteManager.CheckRoutes();
         const int DataBytesLength = 20;
         var data = new byte[DataBytesLength];
         new Random().NextBytes(data);
@@ -134,13 +137,13 @@ public class KafkaProducerShould
         this.autoResetEvents.Add(topicName, autoResetEvent);
         kafkaListener.OnReceived += this.KafkaListener_OnReceived;
         _ = Task.Run(() => kafkaListener.Start(), token);
-        Task.Delay(TimeSpan.FromMilliseconds(500), token).Wait(token);
+        Task.Delay(TimeSpan.FromMilliseconds(1000), token).Wait(token);
 
         //act
         this.kafkaProducer.Produce(data, topicName);
 
         //assert
-        autoResetEvent.WaitOne();
+        autoResetEvent.WaitOne(10000);
         this.results[topicName].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[topicName].Should().Be(null);
         cancellationTokenSource.Cancel();

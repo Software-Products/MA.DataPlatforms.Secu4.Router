@@ -20,6 +20,7 @@ using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 using NSubstitute;
 
@@ -29,8 +30,8 @@ namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.BrokersPublishers.Kafk
 
 public class KafkaProducerHolderShould
 {
-    const string Route = "test";
-    const string DeadLetterTopic = "dead_letter";
+    private const string Route = "test";
+    private const string DeadLetterTopic = "dead_letter";
     private readonly IRouteRepository routeRepository;
     private readonly IRouteManager routeManager;
     private readonly IKafkaProducer producer;
@@ -46,7 +47,6 @@ public class KafkaProducerHolderShould
 
         routingConfigurationProvider.Provide().Returns(new RoutingConfiguration(new KafkaRoutingConfig(new KafkaPublishingConfig(), [], [], DeadLetterTopic)));
         this.kafkaProducerHolder = new KafkaProducerHolder(this.routeRepository, this.routeManager, this.producer, routingConfigurationProvider);
-
         this.routingDataPacket = new RoutingDataPacket([], Route, DateTime.UtcNow);
     }
 
@@ -70,7 +70,7 @@ public class KafkaProducerHolderShould
 
         //assert
         this.producer.Received(1).Initiate();
-        this.routeManager.Received(1).CheckRoutes();
+        this.routeManager.Received(1).CheckRoutes(Arg.Any<KafkaRoutingManagementInfo>());
     }
 
     [Fact]

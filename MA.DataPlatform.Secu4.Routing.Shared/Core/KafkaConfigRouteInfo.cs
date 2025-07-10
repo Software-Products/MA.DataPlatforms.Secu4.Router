@@ -15,13 +15,14 @@
 // limitations under the License.
 // </copyright>
 
+using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
 
 namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 internal class KafkaConfigRouteInfo
 {
-    public KafkaConfigRouteInfo(IKafkaRoute route, IList<IKafkaTopicMetaData> metaData)
+    public KafkaConfigRouteInfo(IKafkaRoute route, IList<KafkaTopicMetaData> metaData)
     {
         this.Route = route;
         this.MetaData = metaData;
@@ -29,5 +30,5 @@ internal class KafkaConfigRouteInfo
 
     public IKafkaRoute Route { get; }
 
-    public IList<IKafkaTopicMetaData> MetaData { get; }
+    public IList<KafkaTopicMetaData> MetaData { get; }
 }
