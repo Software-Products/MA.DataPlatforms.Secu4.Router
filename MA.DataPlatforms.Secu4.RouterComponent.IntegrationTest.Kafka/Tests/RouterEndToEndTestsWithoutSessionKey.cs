@@ -1,6 +1,6 @@
-// <copyright file="RouterEndToEndTestsWithoutSessionKey.cs" company="McLaren Applied Ltd.">
+// <copyright file="RouterEndToEndTestsWithoutSessionKey.cs" company="Motion Applied Ltd.">
 //
-// Copyright 2024 McLaren Applied Ltd
+// Copyright 2025 Motion Applied Ltd
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -345,7 +345,7 @@ public class RouterEndToEndTests
 
         // act
         routeManager.CheckRoutes(routingManagementInfo1);
-      
+
         //assert
         var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(3));
         var found = metadata.Topics.FirstOrDefault(i => i.Topic == "sample_route_1_topic1");

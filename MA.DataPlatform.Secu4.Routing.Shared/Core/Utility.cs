@@ -1,6 +1,6 @@
-// <copyright file="Utility.cs" company="McLaren Applied Ltd.">
+// <copyright file="Utility.cs" company="Motion Applied Ltd.">
 //
-// Copyright 2024 McLaren Applied Ltd
+// Copyright 2025 Motion Applied Ltd
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,14 +31,12 @@ public class Utility
     public List<KafkaRoutingManagementInfo> CreateRouteManagementInfo()
     {
         var config = this.configurationProvider.Provide();
-        return config.KafkaConsumingConfigs.Select(
-                i => new
-                {
-                    i.KafkaListeningConfig.Server,
-                    i.KafkaRoutes,
-                    i.RoutesMetaData
-                }).GroupBy(i => i.Server).Select(
-                i => new KafkaRoutingManagementInfo(i.Key, i.Select(j => j.KafkaRoutes).ToList(), i.Select(j => j.RoutesMetaData).ToList()))
+        return config.KafkaConsumingConfigs.Select(i => new
+            {
+                i.KafkaListeningConfig.Server,
+                i.KafkaRoutes,
+                i.RoutesMetaData
+            }).GroupBy(i => i.Server).Select(i => new KafkaRoutingManagementInfo(i.Key, i.Select(j => j.KafkaRoutes).ToList(), i.Select(j => j.RoutesMetaData).ToList()))
             .ToList();
     }
 }
