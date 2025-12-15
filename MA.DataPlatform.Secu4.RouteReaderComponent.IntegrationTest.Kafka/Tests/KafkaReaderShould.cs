@@ -289,6 +289,79 @@ public class KafkaReaderShould
         routingDataPackets.Count.Should().Be(3);
     }
 
+    [Fact]
+    public void Creating_Two_Concurrent_Reader_With_Same_Configuration_ShouldNot_ThrowException()
+    {
+        //arrange
+        var kafkaReader1 = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaReader2 = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var groupId = Guid.NewGuid().ToString();
+        var topicName = Guid.NewGuid().ToString();
+        new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName, 3));
+        var kafkaRoute1 = new KafkaRoute("test5", topicName, 0);
+        var kafkaRoute2 = new KafkaRoute("test6", topicName, 1);
+        var kafkaRoute3 = new KafkaRoute("test7", topicName, 2);
+        var kafkaRoute4 = new KafkaRoute("test8", topicName);
+        var routes = new List<KafkaRoute>
+        {
+            kafkaRoute1,
+            kafkaRoute2,
+            kafkaRoute3
+        };
+        this.subscriberConfigurationProvider.Provide().Returns(
+            new ConsumingConfiguration(
+            [
+                new KafkaConsumingConfig(
+                    new KafkaListeningConfig(Server, groupId, AutoOffsetResetMode.Earliest, 0),
+                    kafkaRoute4,
+                    new KafkaTopicMetaData(topicName, 3))
+            ]));
+        var autoResetEvent1 = new AutoResetEvent(false);
+        var autoResetEvent2 = new AutoResetEvent(false);
+        var routingDataPackets1 = new List<RoutingDataPacket?>();
+        var routingDataPackets2 = new List<RoutingDataPacket?>();
+        kafkaReader1.MessageReceived += (_, e) =>
+        {
+            routingDataPackets1.Add(e);
+        };
+        kafkaReader2.MessageReceived += (_, e) =>
+        {
+            routingDataPackets2.Add(e);
+        };
+        kafkaReader1.ReadingCompleted += (_, _) =>
+        {
+            autoResetEvent1.Set();
+        };
+        kafkaReader2.ReadingCompleted += (_, _) =>
+        {
+            autoResetEvent2.Set();
+        };
+        var data = new byte[DataBytesLength];
+        new Random().NextBytes(data);
+        //act
+        for (var i = 0; i < 3; i++)
+        {
+            this.kafkaProducer.Produce(data, routes[i], i.ToString());
+        }
+        
+        Task.Run(()=>kafkaReader1.StartListening(kafkaRoute4));
+        Task.Run(()=>kafkaReader2.StartListening(kafkaRoute4));
+
+        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+
+        for (var i = 0; i < 3; i++)
+        {
+            this.kafkaProducer.Produce(data, routes[i], i.ToString());
+        }
+
+        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        //assert
+        autoResetEvent1.WaitOne(TimeSpan.FromSeconds(30));
+        autoResetEvent2.WaitOne(TimeSpan.FromSeconds(30));
+        routingDataPackets1.Count.Should().Be(3);
+        routingDataPackets2.Count.Should().Be(3);
+    }
+
     private void kafkaReader_MessageReceived(object? sender, RoutingDataPacket e)
     {
         if (e.Message.Length != DataBytesLength)
