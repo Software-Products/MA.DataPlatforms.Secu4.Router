@@ -26,9 +26,9 @@ namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 public class KafkaRouteManager : IRouteManager
 {
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
     private readonly Dictionary<string, IAdminClient> adminClients = new();
     private readonly HashSet<(string Url, string Topic)> processedTopic = [];
-
     private readonly ILogger logger;
 
     public KafkaRouteManager(ILogger logger)
@@ -45,6 +45,7 @@ public class KafkaRouteManager : IRouteManager
 
     private async Task StartChecking(KafkaRoutingManagementInfo routingManagementInfo, AutoResetEvent autoResetEvent)
     {
+        await Semaphore.WaitAsync();
         try
         {
             if (!this.adminClients.TryGetValue(routingManagementInfo.Url, out var adminClient))
@@ -92,6 +93,7 @@ public class KafkaRouteManager : IRouteManager
         finally
         {
             autoResetEvent.Set();
+            Semaphore.Release();
         }
     }
 
