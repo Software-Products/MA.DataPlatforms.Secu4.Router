@@ -29,8 +29,8 @@ public class KafkaListener : KafkaConsumer, IKafkaListener
 {
     private readonly ILogger logger;
 
-    public KafkaListener(IConsumingConfigurationProvider consumingConfigurationProvider, ICancellationTokenSourceProvider cancellationTokenSourceProvider, ILogger logger)
-        : base(consumingConfigurationProvider, cancellationTokenSourceProvider)
+    public KafkaListener(IConsumingConfigurationProvider consumingConfigurationProvider, ILogger logger)
+        : base(logger, consumingConfigurationProvider)
     {
         this.logger = logger;
     }

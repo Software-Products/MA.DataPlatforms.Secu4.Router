@@ -22,24 +22,22 @@ using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests;
+
+public class KafkaListenerFactoryShould
 {
-    public class KafkaListenerFactoryShould
+    [Fact]
+    public void ReturnKafkaListener_On_Creation_Method_Call()
     {
-        [Fact]
-        public void ReturnKafkaListener_On_Creation_Method_Call()
-        {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var cancellationTokenProvider = Substitute.For<ICancellationTokenSourceProvider>();
-            var logger = Substitute.For<ILogger>();
-            var factory = new KafkaListenerFactory(configurationProvider, cancellationTokenProvider, logger);
+        //arrange
+        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
+        var logger = Substitute.For<ILogger>();
+        var factory = new KafkaListenerFactory(configurationProvider, logger);
 
-            //act
-            var listener = factory.Create();
+        //act
+        var listener = factory.Create();
 
-            //assert
-            listener.Should().BeOfType<KafkaListener>();
-        }
+        //assert
+        listener.Should().BeOfType<KafkaListener>();
     }
 }

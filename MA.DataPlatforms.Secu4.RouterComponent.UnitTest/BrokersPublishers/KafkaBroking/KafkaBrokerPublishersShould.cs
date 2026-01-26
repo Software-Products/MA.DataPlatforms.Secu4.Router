@@ -66,8 +66,8 @@ public class KafkaBrokerPublishersShould
         kafkaBrokerPublisher.Publish(data);
 
         //assert
-        this.logger.Received(1).Debug("publishing data");
-        this.logger.Received(1).Debug("publishing data completed");
+        this.logger.Received(1).Trace("publishing data");
+        this.logger.Received(1).Trace("publishing data completed");
         this.kafkaProducerHolder.Received(1).Publish(data);
     }
 

@@ -35,11 +35,8 @@ public class KafkaReaderShould
     private readonly KafkaHelperProducer kafkaProducer;
     private readonly IConsumingConfigurationProvider subscriberConfigurationProvider;
 
-    private readonly CancellationTokenSource cancellationTokenSource = new();
-
     private readonly Dictionary<string, byte[]?> results = [];
     private readonly Dictionary<string, string?> resultKeys = [];
-    private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     private readonly ILogger logger;
 
     public KafkaReaderShould(RunKafkaDockerComposeFixture dockerComposeFixture)
@@ -47,9 +44,7 @@ public class KafkaReaderShould
         this.DockerComposeFixture = dockerComposeFixture;
         this.kafkaProducer = new KafkaHelperProducer(Server);
         this.subscriberConfigurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-        this.cancellationTokenSourceProvider = Substitute.For<ICancellationTokenSourceProvider>();
         this.logger = Substitute.For<ILogger>();
-        this.cancellationTokenSourceProvider.Provide().Returns(this.cancellationTokenSource);
     }
 
     public RunKafkaDockerComposeFixture DockerComposeFixture { get; }
@@ -58,8 +53,8 @@ public class KafkaReaderShould
     public void Producer_Produce_Data_With_key_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing_With_Earliest_Offset_Starting()
     {
         //arrange
-        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
-        var topicName = Guid.NewGuid().ToString();
+        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
+        var topicName = "topic_krs_1";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test1", topicName);
         this.subscriberConfigurationProvider.Provide().Returns(
@@ -83,11 +78,11 @@ public class KafkaReaderShould
 
         //act
         this.kafkaProducer.Produce(data, kafkaRoute, key);
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(1));
         kafkaReader.StartListening(kafkaRoute);
-
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
-        this.cancellationTokenSource.Cancel();
+        kafkaReader.Stop();
         this.results[kafkaRoute.Name].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[kafkaRoute.Name].Should().Be(key);
     }
@@ -96,8 +91,8 @@ public class KafkaReaderShould
     public void Producer_Produce_Data_With_Offset_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing()
     {
         //arrange
-        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
-        var topicName = Guid.NewGuid().ToString();
+        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
+        var topicName = "topic_krs_2";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test3", topicName, 0);
         this.subscriberConfigurationProvider.Provide().Returns(
@@ -118,11 +113,12 @@ public class KafkaReaderShould
         new Random().NextBytes(data);
         //act
         this.kafkaProducer.Produce(data, kafkaRoute);
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(1));
         kafkaReader.StartListening(kafkaRoute);
 
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
-        this.cancellationTokenSource.Cancel();
+        kafkaReader.Stop();
         this.results[kafkaRoute.Name].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[kafkaRoute.Name].Should().Be(null);
     }
@@ -131,8 +127,8 @@ public class KafkaReaderShould
     public void Producer_Produce_Data_With_Offset_And_Check_The_Receive_Data_To_See_If_Only_Data_After_That_Offset_Is_Read()
     {
         //arrange
-        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
-        var topicName = Guid.NewGuid().ToString();
+        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
+        var topicName = "topic_krs_3";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test4", topicName, 0);
         this.subscriberConfigurationProvider.Provide().Returns(
@@ -163,7 +159,7 @@ public class KafkaReaderShould
             this.kafkaProducer.Produce(data, kafkaRoute, i.ToString());
         }
 
-        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(2));
         kafkaReader.StartListening(kafkaRoute);
 
         //assert
@@ -183,9 +179,9 @@ public class KafkaReaderShould
     public void Producer_Produce_Data_In_Different_Partitions_Check_Receive_All_Data_From_All_Partitions()
     {
         //arrange
-        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
         var groupId = Guid.NewGuid().ToString();
-        var topicName = Guid.NewGuid().ToString();
+        var topicName = "topic_krs_4";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName, 3));
         var kafkaRoute1 = new KafkaRoute("test5", topicName, 0);
         var kafkaRoute2 = new KafkaRoute("test6", topicName, 1);
@@ -223,6 +219,7 @@ public class KafkaReaderShould
             this.kafkaProducer.Produce(data, routes[i], i.ToString());
         }
 
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(1));
         kafkaReader.StartListening(kafkaRoute4);
 
         //assert
@@ -234,14 +231,14 @@ public class KafkaReaderShould
     public void Producer_Produce_Data_In_Different_Partitions_Check_The_Receive_All_Data_From_All_Partitions_And_Discard_Messaged_Published_After_Start_Listening()
     {
         //arrange
-        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaReader = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
         var groupId = Guid.NewGuid().ToString();
-        var topicName = Guid.NewGuid().ToString();
+        var topicName = "topic_krs_5";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName, 3));
-        var kafkaRoute1 = new KafkaRoute("test5", topicName, 0);
-        var kafkaRoute2 = new KafkaRoute("test6", topicName, 1);
-        var kafkaRoute3 = new KafkaRoute("test7", topicName, 2);
-        var kafkaRoute4 = new KafkaRoute("test8", topicName);
+        var kafkaRoute1 = new KafkaRoute("test9", topicName, 0);
+        var kafkaRoute2 = new KafkaRoute("test10", topicName, 1);
+        var kafkaRoute3 = new KafkaRoute("test11", topicName, 2);
+        var kafkaRoute4 = new KafkaRoute("test12", topicName);
         var routes = new List<KafkaRoute>
         {
             kafkaRoute1,
@@ -274,16 +271,17 @@ public class KafkaReaderShould
             this.kafkaProducer.Produce(data, routes[i], i.ToString());
         }
 
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(2));
         kafkaReader.StartListening(kafkaRoute4);
 
-        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(5));
 
         for (var i = 0; i < 3; i++)
         {
             this.kafkaProducer.Produce(data, routes[i], i.ToString());
         }
 
-        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(5));
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
         routingDataPackets.Count.Should().Be(3);
@@ -293,15 +291,15 @@ public class KafkaReaderShould
     public void Creating_Two_Concurrent_Reader_With_Same_Configuration_ShouldNot_ThrowException()
     {
         //arrange
-        var kafkaReader1 = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
-        var kafkaReader2 = new KafkaReader(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaReader1 = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
+        var kafkaReader2 = new KafkaReader(this.subscriberConfigurationProvider, this.logger);
         var groupId = Guid.NewGuid().ToString();
-        var topicName = Guid.NewGuid().ToString();
+        var topicName = "topic_krs_6";
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName, 3));
-        var kafkaRoute1 = new KafkaRoute("test5", topicName, 0);
-        var kafkaRoute2 = new KafkaRoute("test6", topicName, 1);
-        var kafkaRoute3 = new KafkaRoute("test7", topicName, 2);
-        var kafkaRoute4 = new KafkaRoute("test8", topicName);
+        var kafkaRoute1 = new KafkaRoute("test13", topicName, 0);
+        var kafkaRoute2 = new KafkaRoute("test14", topicName, 1);
+        var kafkaRoute3 = new KafkaRoute("test15", topicName, 2);
+        var kafkaRoute4 = new KafkaRoute("test16", topicName);
         var routes = new List<KafkaRoute>
         {
             kafkaRoute1,
@@ -343,18 +341,20 @@ public class KafkaReaderShould
         {
             this.kafkaProducer.Produce(data, routes[i], i.ToString());
         }
-        
-        Task.Run(()=>kafkaReader1.StartListening(kafkaRoute4));
-        Task.Run(()=>kafkaReader2.StartListening(kafkaRoute4));
 
-        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(2));
+
+        Task.Run(() => kafkaReader1.StartListening(kafkaRoute4));
+        Task.Run(() => kafkaReader2.StartListening(kafkaRoute4));
+
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(5));
 
         for (var i = 0; i < 3; i++)
         {
             this.kafkaProducer.Produce(data, routes[i], i.ToString());
         }
 
-        Task.Delay(TimeSpan.FromMilliseconds(2000)).Wait();
+        new AutoResetEvent(false).WaitOne(TimeSpan.FromSeconds(5));
         //assert
         autoResetEvent1.WaitOne(TimeSpan.FromSeconds(30));
         autoResetEvent2.WaitOne(TimeSpan.FromSeconds(30));

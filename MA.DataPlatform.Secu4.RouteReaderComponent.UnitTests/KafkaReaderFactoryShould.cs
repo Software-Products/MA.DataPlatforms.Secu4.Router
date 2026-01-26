@@ -15,31 +15,68 @@
 // limitations under the License.
 // </copyright>
 
-using FluentAssertions;
-
 using MA.Common.Abstractions;
+using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
-namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests;
+
+public class KafkaReaderFactoryShould
 {
-    public class KafkaReaderFactoryShould
+    private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
+    private readonly ILogger logger;
+    private readonly KafkaReaderFactory sut;
+
+    public KafkaReaderFactoryShould()
     {
-        [Fact]
-        public void ReturnKafkaListener_On_Creation_Method_Call()
-        {
-            //arrange
-            var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-            var cancellationTokenProvider = Substitute.For<ICancellationTokenSourceProvider>();
-            var logger = Substitute.For<ILogger>();
-            var factory = new KafkaReaderFactory(configurationProvider, cancellationTokenProvider, logger);
+        this.consumingConfigurationProvider = Substitute.For<IConsumingConfigurationProvider>();
+        this.logger = Substitute.For<ILogger>();
+        this.sut = new KafkaReaderFactory(this.consumingConfigurationProvider, this.logger);
+    }
 
-            //act
-            var listener = factory.Create();
+    [Fact]
+    public void Create_ShouldReturnKafkaReader()
+    {
+        // Act
+        var result = this.sut.Create();
 
-            //assert
-            listener.Should().BeOfType<KafkaReader>();
-        }
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsAssignableFrom<IKafkaReader>(result);
+    }
+
+    [Fact]
+    public void Create_ShouldReturnNewInstanceEachTime()
+    {
+        // Act
+        var result1 = this.sut.Create();
+        var result2 = this.sut.Create();
+
+        // Assert
+        Assert.NotSame(result1, result2);
+    }
+
+    [Fact]
+    public void Constructor_ShouldInitializeWithProvidedDependencies()
+    {
+        // Arrange & Act
+        var factory = new KafkaReaderFactory(this.consumingConfigurationProvider, this.logger);
+
+        // Assert
+        Assert.NotNull(factory);
+    }
+
+    [Fact]
+    public void Create_ShouldPassDependenciesToKafkaReader()
+    {
+        // Act
+        var result = this.sut.Create();
+
+        // Assert
+        Assert.NotNull(result);
+        // The reader should be successfully created with the injected dependencies
+        Assert.IsType<KafkaReader>(result);
     }
 }

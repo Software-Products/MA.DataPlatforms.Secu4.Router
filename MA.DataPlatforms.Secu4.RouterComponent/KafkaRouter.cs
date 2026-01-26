@@ -1,4 +1,4 @@
-// <copyright file="Router.cs" company="Motion Applied Ltd.">
+// <copyright file="KafkaRouter.cs" company="Motion Applied Ltd.">
 //
 // Copyright 2025 Motion Applied Ltd
 // 
@@ -17,32 +17,36 @@
 
 using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
-using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 namespace MA.DataPlatforms.Secu4.RouterComponent;
 
-public class Router : IRouter
+public class KafkaRouter : IRouter
 {
     private readonly ILogger logger;
+    private readonly IRouteReadingWritingComponentRepository<KafkaRouter> routerRepository;
+    private readonly KafkaBrokerPublisher brokerPublisher;
 
-    private readonly IKafkaProducerHolderBuilder kafkaProducerBuilder;
-    private IBrokerPublisher brokerPublisher;
-
-    public Router(ILogger logger, IKafkaProducerHolderBuilder kafkaProducerBuilder)
+    public KafkaRouter(ILogger logger, IKafkaProducerHolderBuilder kafkaProducerBuilder, IRouteReadingWritingComponentRepository<KafkaRouter> routerRepository, string id)
     {
         this.logger = logger;
-        this.kafkaProducerBuilder = kafkaProducerBuilder;
-        this.brokerPublisher = new EmptyBrokerPublisher(logger);
+        this.routerRepository = routerRepository;
+        var kafkaProducerHolder = kafkaProducerBuilder.Build();
+        this.brokerPublisher = new KafkaBrokerPublisher(this.logger, kafkaProducerHolder);
+        this.Id = id;
+        this.logger.Info($"Router created with ID: {this.Id}");
+        this.routerRepository.Add(this);
     }
+
+    public string Id { get; }
 
     public void Initiate()
     {
-        var kafkaProducerHolder = this.kafkaProducerBuilder.Build();
-        this.brokerPublisher = new KafkaBrokerPublisher(this.logger, kafkaProducerHolder);
         this.brokerPublisher.Initiate();
+        this.logger.Info($"Router initiated with ID: {this.Id}");
     }
 
     public void Route(RoutingDataPacket dataPacket)
@@ -53,5 +57,7 @@ public class Router : IRouter
     public void ShutDown()
     {
         this.brokerPublisher.Shutdown();
+        this.logger.Info($"Router shutdown with ID: {this.Id}");
+        this.routerRepository.Remove(this.Id);
     }
 }

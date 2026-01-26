@@ -1,4 +1,4 @@
-// <copyright file="IRouter.cs" company="Motion Applied Ltd.">
+// <copyright file="IKafkaRoutingManagementInfoCreator.cs" company="Motion Applied Ltd.">
 //
 // Copyright 2025 Motion Applied Ltd
 // 
@@ -15,16 +15,11 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatforms.Secu4.Routing.Contracts;
-using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
-namespace MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-public interface IRouter : IRouteReadingWritingComponent
+public interface IKafkaRoutingManagementInfoCreator
 {
-    void Initiate();
-
-    void ShutDown();
-
-    void Route(RoutingDataPacket dataPacket);
+    List<KafkaRoutingManagementInfo> CreateRouteManagementInfo();
 }

@@ -19,24 +19,30 @@ using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
-public class Utility
+public class KafkaRoutingManagementInfoCreator : IKafkaRoutingManagementInfoCreator
 {
     private readonly IConsumingConfigurationProvider configurationProvider;
+    private readonly KafkaTopicMetaDataComparer comparer;
 
-    public Utility(IConsumingConfigurationProvider configurationProvider)
+    public KafkaRoutingManagementInfoCreator(IConsumingConfigurationProvider configurationProvider)
     {
         this.configurationProvider = configurationProvider;
+        this.comparer = new KafkaTopicMetaDataComparer(StringComparer.OrdinalIgnoreCase);
     }
 
     public List<KafkaRoutingManagementInfo> CreateRouteManagementInfo()
     {
         var config = this.configurationProvider.Provide();
-        return config.KafkaConsumingConfigs.Select(i => new
+        var kafkaRoutingManagementInfos = config.KafkaConsumingConfigs.Select(i => new
             {
                 i.KafkaListeningConfig.Server,
                 i.KafkaRoutes,
                 i.RoutesMetaData
-            }).GroupBy(i => i.Server).Select(i => new KafkaRoutingManagementInfo(i.Key, i.Select(j => j.KafkaRoutes).ToList(), i.Select(j => j.RoutesMetaData).ToList()))
+            }).GroupBy(i => i.Server).Select(i => new KafkaRoutingManagementInfo(
+                i.Key,
+                i.Select(j => j.KafkaRoutes).ToList(),
+                i.Select(j => j.RoutesMetaData).Distinct(this.comparer).ToList()))
             .ToList();
+        return kafkaRoutingManagementInfos;
     }
 }

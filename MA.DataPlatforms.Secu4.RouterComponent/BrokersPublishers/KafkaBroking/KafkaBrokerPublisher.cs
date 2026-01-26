@@ -42,9 +42,9 @@ public class KafkaBrokerPublisher : IBrokerPublisher
 
     public void Publish(RoutingDataPacket data)
     {
-        this.logger.Debug("publishing data");
+        this.logger.Trace("publishing data");
         this.producerHolder.Publish(data);
-        this.logger.Debug("publishing data completed");
+        this.logger.Trace("publishing data completed");
     }
 
     public void Shutdown()

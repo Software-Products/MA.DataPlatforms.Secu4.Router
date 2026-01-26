@@ -16,15 +16,15 @@
 // </copyright>
 
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions
+namespace MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
+
+public interface IRouteReader : IRouteReadingWritingComponent
 {
-    public interface IRouteReader
-    {
-        public event EventHandler<RoutingDataPacket> PacketReceived;
+    public event EventHandler<RoutingDataPacket> PacketReceived;
 
-        public event EventHandler<ReadingCompletedEventArgs> ReadingCompleted;
+    public event EventHandler<ReadingCompletedEventArgs> ReadingCompleted;
 
-        public void StartReading();
-    }
+    public void StartReading();
 }

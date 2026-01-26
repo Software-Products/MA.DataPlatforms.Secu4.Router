@@ -28,8 +28,9 @@ public class KafkaProducer : IKafkaProducer
 {
     private readonly ILogger logger;
     private readonly IRoutingConfigurationProvider routingConfigurationProvider;
-    private readonly IKafkaQueueFullRetryExecutor kafkaQueueFullRetryExecutor;
+    private readonly KafkaQueueFullRetryExecutor kafkaQueueFullRetryExecutor;
     private IProducer<string?, byte[]>? producer;
+    private bool disposed;
 
     internal KafkaProducer(
         ILogger logger,
@@ -110,9 +111,18 @@ public class KafkaProducer : IKafkaProducer
 
     protected virtual void Dispose(bool disposing)
     {
-        if (disposing)
+        if (!disposing)
         {
-            this.producer?.Dispose();
+            return;
         }
+
+        if (this.disposed)
+        {
+            return;
+        }
+
+        this.producer?.Flush();
+        this.producer?.Dispose();
+        this.disposed = true;
     }
 }

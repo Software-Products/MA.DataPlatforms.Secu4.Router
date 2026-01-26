@@ -21,32 +21,31 @@ using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Contracts.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatforms.Secu4.Routing.Shared.Core
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
+
+public class KafkaRouteRepository : IKafkaRouteRepository
 {
-    public class KafkaRouteRepository : IKafkaRouteRepository
+    private readonly ConcurrentDictionary<string, KafkaRoute> routeDictionary;
+    private readonly List<KafkaRoute> routes;
+
+    public KafkaRouteRepository(IEnumerable<KafkaRoute> kafkaRoutes)
     {
-        private readonly ConcurrentDictionary<string, KafkaRoute> routeDictionary;
-        private readonly List<KafkaRoute> routes;
+        this.routes = new List<KafkaRoute>(kafkaRoutes);
+        this.routeDictionary = new ConcurrentDictionary<string, KafkaRoute>(this.routes.ToDictionary(i => i.Name));
+    }
 
-        public KafkaRouteRepository(IEnumerable<KafkaRoute> kafkaRoutes)
+    public IRoute Find(string name)
+    {
+        if (this.routeDictionary.TryGetValue(name, out var route))
         {
-            this.routes = new List<KafkaRoute>(kafkaRoutes);
-            this.routeDictionary = new ConcurrentDictionary<string, KafkaRoute>(this.routes.ToDictionary(i => i.Name));
+            return route;
         }
 
-        public IRoute Find(string name)
-        {
-            if (this.routeDictionary.TryGetValue(name, out var route))
-            {
-                return route;
-            }
+        return new EmptyRoute();
+    }
 
-            return new EmptyRoute();
-        }
-
-        public IReadOnlyList<IRoute> GetRoutes()
-        {
-            return this.routes;
-        }
+    public IReadOnlyList<IRoute> GetRoutes()
+    {
+        return this.routes;
     }
 }
