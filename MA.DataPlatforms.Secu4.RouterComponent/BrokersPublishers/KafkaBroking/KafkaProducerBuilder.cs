@@ -44,6 +44,7 @@ public class KafkaProducerBuilder : IKafkaProducerHolderBuilder
     public IKafkaProducerHolder Build()
     {
         var config = this.routingConfigurationProvider.Provide();
+        
         var kafkaRoutes = config.KafkaRoutingConfig.KafkaRoutes;
         kafkaRoutes.Add(new KafkaRoute("dead-letter", config.KafkaRoutingConfig.DeadLetterTopic));
         var kafkaRouteRepository = new KafkaRouteRepository(kafkaRoutes);

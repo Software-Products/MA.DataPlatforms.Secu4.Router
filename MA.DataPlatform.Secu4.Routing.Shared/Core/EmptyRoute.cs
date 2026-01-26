@@ -23,3 +23,10 @@ public class EmptyRoute : IRoute
 {
     public string Name => "";
 }
+
+public class KafkaEmptyRoute : EmptyRoute, IKafkaRoute
+{
+    public string Topic => "";
+
+    public int? Partition => null;
+}

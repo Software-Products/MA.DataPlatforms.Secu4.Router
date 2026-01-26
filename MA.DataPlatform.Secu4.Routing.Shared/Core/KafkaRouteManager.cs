@@ -77,6 +77,7 @@ public class KafkaRouteManager : IRouteManager
                 if (foundInfo is not null)
                 {
                     this.CheckConsistency(foundInfo, configuredRoute);
+                    this.logger.Info($"topic {configuredRoute.Route.Topic} already exist");
                 }
                 else
                 {
@@ -109,10 +110,14 @@ public class KafkaRouteManager : IRouteManager
                 ReplicationFactor = kafkaTopicMetaData.ReplicationFactor ?? -1
             };
 
+            this.logger.Info($"creating topic {topicSpecification.Name}:{topicSpecification.NumPartitions}({topicSpecification.ReplicationFactor})");
+
             await this.adminClients[url].CreateTopicsAsync(
             [
                 topicSpecification
             ]);
+
+            this.logger.Info($"topic {topicSpecification.Name}:{topicSpecification.NumPartitions}({topicSpecification.ReplicationFactor}) created");
         }
         catch (Exception ex)
         {

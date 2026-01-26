@@ -1,4 +1,4 @@
-// <copyright file="IRouter.cs" company="Motion Applied Ltd.">
+// <copyright file="IRouteReadingWritingComponent.cs" company="Motion Applied Ltd.">
 //
 // Copyright 2025 Motion Applied Ltd
 // 
@@ -15,16 +15,9 @@
 // limitations under the License.
 // </copyright>
 
-using MA.DataPlatforms.Secu4.Routing.Contracts;
-using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+namespace MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
-
-public interface IRouter : IRouteReadingWritingComponent
+public interface IRouteReadingWritingComponent
 {
-    void Initiate();
-
-    void ShutDown();
-
-    void Route(RoutingDataPacket dataPacket);
+    public string Id { get; }
 }

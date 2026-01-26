@@ -15,11 +15,11 @@
 // limitations under the License.
 // </copyright>
 
-using FluentAssertions;
-
+using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 using NSubstitute;
 
@@ -27,50 +27,351 @@ namespace MA.DataPlatforms.Secu4.RouteReaderComponent.UnitTests;
 
 public class KafkaRouteReaderShould
 {
-    private readonly IKafkaReaderFactory readerFactory = Substitute.For<IKafkaReaderFactory>();
+    private readonly IKafkaReaderFactory kafkaReaderFactory = Substitute.For<IKafkaReaderFactory>();
+    private readonly IRouteManager routeManager = Substitute.For<IRouteManager>();
+    private readonly ILogger logger = Substitute.For<ILogger>();
+    private readonly IRouteReadingWritingComponentRepository<KafkaRouteReader> routeReaderRepository =
+        Substitute.For<IRouteReadingWritingComponentRepository<KafkaRouteReader>>();
+    private readonly IKafkaRoutingManagementInfoCreator kafkaRoutingManagementInfoCreator = Substitute.For<IKafkaRoutingManagementInfoCreator>();
+
+    private const string TestId = "test-id";
 
     [Fact]
-    public void Raise_Event_On_Listener_MessageReceived_Event()
+    public void Constructor_ShouldInitializeProperties()
     {
-        //arrange
-        var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-        var routeManager = Substitute.For<IRouteManager>();
-        var routeReader = new KafkaRouteReader(this.readerFactory, configurationProvider, routeManager);
-        var listenMessageReceived = false;
-        const string TopicName = "test";
-        var kafkaRoute = new KafkaRoute(TopicName, TopicName);
-        var reader = Substitute.For<IKafkaReader>();
+        // Act
+        var sut = new KafkaRouteReader(
+            this.kafkaReaderFactory,
+            this.routeManager,
+            this.logger,
+            this.routeReaderRepository,
+            this.kafkaRoutingManagementInfoCreator,
+            TestId);
 
-        configurationProvider.Provide().Returns(
-            new ConsumingConfiguration(
-            [
-                new KafkaConsumingConfig(
-                    new KafkaListeningConfig(),
-                    kafkaRoute,
-                    new KafkaTopicMetaData(TopicName))
-            ]));
-        this.readerFactory.Create().Returns(reader);
-        routeReader.PacketReceived += (_, e) =>
+        // Assert
+        Assert.Equal(TestId, sut.Id);
+    }
+
+    [Fact]
+    public void Constructor_ShouldLogCreation()
+    {
+        // Act
+        var _ = new KafkaRouteReader(
+            this.kafkaReaderFactory,
+            this.routeManager,
+            this.logger,
+            this.routeReaderRepository,
+            this.kafkaRoutingManagementInfoCreator,
+            TestId);
+
+        // Assert
+        this.logger.Received(1).Info($"Created Kafka route reader With ID: {TestId}");
+    }
+
+    [Fact]
+    public void Constructor_ShouldAddToRepository()
+    {
+        // Act
+        var sut = new KafkaRouteReader(
+            this.kafkaReaderFactory,
+            this.routeManager,
+            this.logger,
+            this.routeReaderRepository,
+            this.kafkaRoutingManagementInfoCreator,
+            TestId);
+
+        // Assert
+        this.routeReaderRepository.Received(1).Add(sut);
+    }
+
+    [Fact]
+    public void StartReading_ShouldLogStartMessage()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        this.SetupEmptyRoutes();
+
+        // Act
+        sut.StartReading();
+
+        // Assert
+        this.logger.Received(1).Info($"Kafka route reader With ID: {TestId} has started reading.");
+    }
+
+    [Fact]
+    public void StartReading_ShouldCheckRoutesForEachManagementInfo()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var managementInfo1 = CreateKafkaRoutingManagementInfo("url1", new List<KafkaRoute>());
+        var managementInfo2 = CreateKafkaRoutingManagementInfo("url2", new List<KafkaRoute>());
+        var managementInfos = new List<KafkaRoutingManagementInfo>
         {
-            if (e.Route == kafkaRoute.Name)
-            {
-                listenMessageReceived = true;
-            }
+            managementInfo1,
+            managementInfo2
         };
+        this.SetupRouteManagementInfos(managementInfos);
 
-        reader.When(i => i.StartListening(kafkaRoute)).Do(_ => reader.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(
-            this,
-            new RoutingDataPacket(
-                [
-                    1, 2, 3
-                ],
-                kafkaRoute.Name,
-                DateTime.UtcNow)));
+        // Act
+        sut.StartReading();
 
-        //act
-        routeReader.StartReading();
+        // Assert
+        this.routeManager.Received(1).CheckRoutes(managementInfo1);
+        this.routeManager.Received(1).CheckRoutes(managementInfo2);
+    }
 
-        //assert
-        listenMessageReceived.Should().BeTrue();
+    [Fact]
+    public void StartReading_ShouldCreateKafkaReaderForEachRoute()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route1 = CreateKafkaRoute("route1", "topic1");
+        var route2 = CreateKafkaRoute("route2", "topic2");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route1,
+                route2
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader1 = Substitute.For<IKafkaReader>();
+        var kafkaReader2 = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader1, kafkaReader2);
+
+        // Act
+        sut.StartReading();
+
+        // Assert
+        this.kafkaReaderFactory.Received(2).Create();
+    }
+
+    [Fact]
+    public void StartReading_ShouldLogForEachRoute()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route1 = CreateKafkaRoute("route1", "topic1");
+        var route2 = CreateKafkaRoute("route2", "topic2");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route1,
+                route2
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        // Act
+        sut.StartReading();
+
+        // Assert
+        this.logger.Received(1).Info("Starting Kafka reader for route: route1 topic: topic1");
+        this.logger.Received(1).Info("Starting Kafka reader for route: route2 topic: topic2");
+    }
+
+    [Fact]
+    public void StartReading_ShouldSubscribeToKafkaReaderEvents()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        // Act
+        sut.StartReading();
+
+        // Assert
+        kafkaReader.Received(1).MessageReceived += Arg.Any<EventHandler<RoutingDataPacket>>();
+        kafkaReader.Received(1).ReadingCompleted += Arg.Any<EventHandler<ReadingCompletedEventArgs>>();
+    }
+
+    [Fact]
+    public void StartReading_ShouldStartListeningOnKafkaReader()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        // Act
+        sut.StartReading();
+
+        // Assert
+        kafkaReader.Received(1).StartListening(route);
+    }
+
+    [Fact]
+    public void KafkaReader_MessageReceived_ShouldRaisePacketReceivedEvent()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        RoutingDataPacket? receivedPacket = null;
+        sut.PacketReceived += (_, packet) => receivedPacket = packet;
+
+        sut.StartReading();
+
+        var expectedPacket = new RoutingDataPacket([1, 2, 3], "route1", DateTime.UtcNow);
+
+        // Act
+        // Manually invoke the event handler since RoutingDataPacket does not inherit from EventArgs
+        kafkaReader.MessageReceived += Raise.Event<EventHandler<RoutingDataPacket>>(kafkaReader, expectedPacket);
+
+        // Assert
+        Assert.NotNull(receivedPacket);
+        Assert.Equal(expectedPacket, receivedPacket);
+    }
+
+    [Fact]
+    public void KafkaReader_ReadingCompleted_ShouldRaiseReadingCompletedEvent()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        ReadingCompletedEventArgs? receivedArgs = null;
+        sut.ReadingCompleted += (_, args) => receivedArgs = args;
+
+        sut.StartReading();
+
+        var expectedArgs = new ReadingCompletedEventArgs("route1", DateTime.UtcNow, 100);
+
+        // Act
+        kafkaReader.ReadingCompleted += Raise.EventWith(kafkaReader, expectedArgs);
+
+        // Assert
+        Assert.NotNull(receivedArgs);
+        Assert.Equal(expectedArgs, receivedArgs);
+    }
+
+    [Fact]
+    public void KafkaReader_ReadingCompleted_ShouldLogCompletion()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        sut.StartReading();
+
+        var args = new ReadingCompletedEventArgs("route1", DateTime.UtcNow, 100);
+
+        // Act
+        kafkaReader.ReadingCompleted += Raise.EventWith(kafkaReader, args);
+
+        // Assert
+        this.logger.Received(1).Info($"Kafka route reader With ID: {TestId} has completed reading.");
+    }
+
+    [Fact]
+    public void KafkaReader_ReadingCompleted_ShouldRemoveFromRepository()
+    {
+        // Arrange
+        var sut = this.CreateSut();
+        var route = CreateKafkaRoute("route1", "topic1");
+        var managementInfo = CreateKafkaRoutingManagementInfo(
+            "url",
+            new List<KafkaRoute>
+            {
+                route
+            });
+        this.SetupRouteManagementInfos([managementInfo]);
+
+        var kafkaReader = Substitute.For<IKafkaReader>();
+        this.kafkaReaderFactory.Create().Returns(kafkaReader);
+
+        sut.StartReading();
+
+        var args = new ReadingCompletedEventArgs("route1", DateTime.UtcNow, 100);
+
+        // Act
+        kafkaReader.ReadingCompleted += Raise.EventWith(kafkaReader, args);
+
+        // Assert
+        this.routeReaderRepository.Received(1).Remove(TestId);
+    }
+
+    private KafkaRouteReader CreateSut()
+    {
+        return new KafkaRouteReader(
+            this.kafkaReaderFactory,
+            this.routeManager,
+            this.logger,
+            this.routeReaderRepository,
+            this.kafkaRoutingManagementInfoCreator,
+            TestId);
+    }
+
+    private void SetupEmptyRoutes()
+    {
+        this.SetupRouteManagementInfos([]);
+    }
+
+    private void SetupRouteManagementInfos(List<KafkaRoutingManagementInfo> managementInfos)
+    {
+        this.kafkaRoutingManagementInfoCreator.CreateRouteManagementInfo().Returns(managementInfos);
+    }
+
+    private static KafkaRoutingManagementInfo CreateKafkaRoutingManagementInfo(string url, IReadOnlyList<KafkaRoute> routes)
+    {
+        return new KafkaRoutingManagementInfo(url, routes, new List<KafkaTopicMetaData>());
+    }
+
+    private static KafkaRoute CreateKafkaRoute(string name, string topic)
+    {
+        return new KafkaRoute(name, topic);
     }
 }

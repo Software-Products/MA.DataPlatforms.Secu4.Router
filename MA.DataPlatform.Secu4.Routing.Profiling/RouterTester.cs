@@ -21,6 +21,7 @@ using MA.Common;
 using MA.DataPlatforms.Secu4.RouterComponent;
 using MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.Routing.Profiling;
@@ -28,13 +29,18 @@ namespace MA.DataPlatforms.Secu4.Routing.Profiling;
 [ExcludeFromCodeCoverage]
 internal class RouterTester
 {
-    private readonly Router router;
+    private readonly KafkaRouter kafkaRouter;
     private readonly List<RoutingDataPacket> lstMessages;
 
     public RouterTester(int numberOfMessages, int sizeOfContent)
     {
         var logger = new ConsoleLogger();
-        this.router = new Router(logger, new KafkaProducerBuilder(logger, new RoutingConfigurationProvider(), new KafkaRouteManager(logger)));
+        var routerRepository = new RouteReadingWritingComponentRepository<KafkaRouter>(logger);
+        this.kafkaRouter = new KafkaRouter(
+            logger,
+            new KafkaProducerBuilder(logger, new RoutingConfigurationProvider(), new KafkaRouteManager(logger)),
+            routerRepository,
+            "TestRouter");
         this.lstMessages = [];
         var rnd = new Random();
 
@@ -44,18 +50,23 @@ internal class RouterTester
             rnd.NextBytes(bytes);
             this.lstMessages.Add(new RoutingDataPacket(bytes, "test", DateTime.UtcNow));
         }
+
+        foreach (var router1 in routerRepository.GetAll())
+        {
+            router1.ShutDown();
+        }
     }
 
     public void Setup()
     {
-        this.router.Initiate();
+        this.kafkaRouter.Initiate();
     }
 
     public void Start()
     {
         foreach (var t in this.lstMessages)
         {
-            this.router.Route(t);
+            this.kafkaRouter.Route(t);
         }
 
         WaitHandler.WaitEvent.Set();

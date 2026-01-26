@@ -35,12 +35,9 @@ public class KafkaListenerShould
     private readonly KafkaHelperProducer kafkaProducer;
     private readonly IConsumingConfigurationProvider subscriberConfigurationProvider;
 
-    private readonly CancellationTokenSource cancellationTokenSource = new();
-
     private readonly Dictionary<string, AutoResetEvent> autoResetEvents = [];
     private readonly Dictionary<string, byte[]?> results = [];
     private readonly Dictionary<string, string?> resultKeys = [];
-    private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     private readonly ILogger logger;
 
     public KafkaListenerShould(RunKafkaDockerComposeFixture dockerComposeFixture)
@@ -48,9 +45,7 @@ public class KafkaListenerShould
         this.DockerComposeFixture = dockerComposeFixture;
         this.kafkaProducer = new KafkaHelperProducer(Server);
         this.subscriberConfigurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-        this.cancellationTokenSourceProvider = Substitute.For<ICancellationTokenSourceProvider>();
         this.logger = Substitute.For<ILogger>();
-        this.cancellationTokenSourceProvider.Provide().Returns(this.cancellationTokenSource);
     }
 
     public RunKafkaDockerComposeFixture DockerComposeFixture { get; }
@@ -59,7 +54,7 @@ public class KafkaListenerShould
     public void Producer_Produce_Data_With_key_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing_With_Earliest_Offset_Starting()
     {
         //arrange
-        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.logger);
         var topicName = Guid.NewGuid().ToString();
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test1", topicName);
@@ -86,7 +81,7 @@ public class KafkaListenerShould
 
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
-        this.cancellationTokenSource.Cancel();
+        kafkaListener.Stop();
         this.results[kafkaRoute.Name].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[kafkaRoute.Name].Should().Be(key);
     }
@@ -95,7 +90,7 @@ public class KafkaListenerShould
     public void Producer_Produce_Data_Without_key_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing()
     {
         //arrange
-        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.logger);
         var topicName = Guid.NewGuid().ToString();
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
 
@@ -128,7 +123,7 @@ public class KafkaListenerShould
 
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
-        this.cancellationTokenSource.Cancel();
+        kafkaListener.Stop();
         this.results[kafkaRoute.Name].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[kafkaRoute.Name].Should().Be(null);
     }
@@ -137,7 +132,7 @@ public class KafkaListenerShould
     public void Producer_Produce_Data_With_Offset_and_Check_the_Receive_Data_To_See_If_Is_Same_As_Publishing()
     {
         //arrange
-        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.logger);
         var topicName = Guid.NewGuid().ToString();
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test3", topicName, 0);
@@ -165,7 +160,7 @@ public class KafkaListenerShould
 
         //assert
         autoResetEvent.WaitOne(TimeSpan.FromSeconds(30));
-        this.cancellationTokenSource.Cancel();
+        kafkaListener.Stop();
         this.results[kafkaRoute.Name].Should().NotBeNull().And.HaveCount(DataBytesLength).And.ContainInOrder(data).And.ContainItemsAssignableTo<byte>();
         this.resultKeys[kafkaRoute.Name].Should().Be(null);
     }
@@ -174,7 +169,7 @@ public class KafkaListenerShould
     public void Producer_Produce_Data_With_Offset_And_Check_The_Receive_Data_To_See_If_Only_Data_After_That_Offset_Is_Read()
     {
         //arrange
-        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.logger);
         var topicName = Guid.NewGuid().ToString();
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test4", topicName, 0);
@@ -229,7 +224,7 @@ public class KafkaListenerShould
     public void NotDeliverDataAfterStopCalled()
     {
         //arrange
-        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        var kafkaListener = new KafkaListener(this.subscriberConfigurationProvider, this.logger);
         var topicName = Guid.NewGuid().ToString();
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topicName));
         var kafkaRoute = new KafkaRoute("test3", topicName, 0);

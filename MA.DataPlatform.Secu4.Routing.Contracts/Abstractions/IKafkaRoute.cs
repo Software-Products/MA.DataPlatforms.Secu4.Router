@@ -23,3 +23,4 @@ public interface IKafkaRoute : IRoute
 
     public int? Partition { get; }
 }
+

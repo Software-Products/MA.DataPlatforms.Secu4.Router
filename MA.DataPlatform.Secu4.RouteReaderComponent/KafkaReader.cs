@@ -30,8 +30,8 @@ public class KafkaReader : KafkaConsumer, IKafkaReader
     private readonly ILogger logger;
     private int messageCounter;
 
-    public KafkaReader(IConsumingConfigurationProvider consumingConfigurationProvider, ICancellationTokenSourceProvider cancellationTokenSourceProvider, ILogger logger)
-        : base(consumingConfigurationProvider, cancellationTokenSourceProvider)
+    public KafkaReader(IConsumingConfigurationProvider consumingConfigurationProvider, ILogger logger)
+        : base(logger,consumingConfigurationProvider)
     {
         this.logger = logger;
     }

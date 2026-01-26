@@ -24,21 +24,18 @@ namespace MA.DataPlatforms.Secu4.RouteReaderComponent;
 public class KafkaReaderFactory : IKafkaReaderFactory
 {
     private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
-    private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     private readonly ILogger logger;
 
     public KafkaReaderFactory(
         IConsumingConfigurationProvider consumingConfigurationProvider,
-        ICancellationTokenSourceProvider cancellationTokenSourceProvider,
         ILogger logger)
     {
         this.consumingConfigurationProvider = consumingConfigurationProvider;
-        this.cancellationTokenSourceProvider = cancellationTokenSourceProvider;
         this.logger = logger;
     }
 
     public IKafkaReader Create()
     {
-        return new KafkaReader(this.consumingConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        return new KafkaReader(this.consumingConfigurationProvider, this.logger);
     }
 }

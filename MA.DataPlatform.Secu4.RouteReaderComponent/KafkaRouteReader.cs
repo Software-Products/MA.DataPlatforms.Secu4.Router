@@ -15,28 +15,40 @@
 // limitations under the License.
 // </copyright>
 
+using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteReaderComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
-using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.RouteReaderComponent;
 
 public class KafkaRouteReader : IRouteReader
 {
     private readonly IKafkaReaderFactory kafkaReaderFactory;
-    private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
     private readonly IRouteManager routeManager;
+    private readonly ILogger logger;
+    private readonly IRouteReadingWritingComponentRepository<KafkaRouteReader> routeReaderRepository;
+    private readonly IKafkaRoutingManagementInfoCreator kafkaRoutingManagementInfoCreator;
 
     public KafkaRouteReader(
         IKafkaReaderFactory kafkaReaderFactory,
-        IConsumingConfigurationProvider consumingConfigurationProvider,
-        IRouteManager routeManager)
+        IRouteManager routeManager,
+        ILogger logger,
+        IRouteReadingWritingComponentRepository<KafkaRouteReader> routeReaderRepository,
+        IKafkaRoutingManagementInfoCreator kafkaRoutingManagementInfoCreator,
+        string id)
     {
         this.kafkaReaderFactory = kafkaReaderFactory;
-        this.consumingConfigurationProvider = consumingConfigurationProvider;
         this.routeManager = routeManager;
+        this.logger = logger;
+        this.routeReaderRepository = routeReaderRepository;
+        this.kafkaRoutingManagementInfoCreator = kafkaRoutingManagementInfoCreator;
+        this.Id = id;
+        logger.Info($"Created Kafka route reader With ID: {this.Id}");
+        routeReaderRepository.Add(this);
     }
+
+    public string Id { get; }
 
     public event EventHandler<RoutingDataPacket>? PacketReceived;
 
@@ -44,7 +56,8 @@ public class KafkaRouteReader : IRouteReader
 
     public void StartReading()
     {
-        var kaRoutingManagementInfos = new Utility(this.consumingConfigurationProvider).CreateRouteManagementInfo();
+        this.logger.Info($"Kafka route reader With ID: {this.Id} has started reading.");
+        var kaRoutingManagementInfos = this.kafkaRoutingManagementInfoCreator.CreateRouteManagementInfo();
         foreach (var kaRoutingManagementInfo in kaRoutingManagementInfos)
         {
             this.routeManager.CheckRoutes(kaRoutingManagementInfo);
@@ -53,6 +66,7 @@ public class KafkaRouteReader : IRouteReader
         var routes = kaRoutingManagementInfos.SelectMany(i => i.Routes).ToList();
         foreach (var kafkaRoute in routes)
         {
+            this.logger.Info($"Starting Kafka reader for route: {kafkaRoute.Name} topic: {kafkaRoute.Topic}");
             var kafkaReader = this.kafkaReaderFactory.Create();
             kafkaReader.MessageReceived += this.KafkaReader_MessageReceived;
             kafkaReader.ReadingCompleted += this.KafkaReader_ReadingCompleted;
@@ -63,6 +77,8 @@ public class KafkaRouteReader : IRouteReader
     private void KafkaReader_ReadingCompleted(object? sender, ReadingCompletedEventArgs e)
     {
         this.ReadingCompleted?.Invoke(this, e);
+        this.logger.Info($"Kafka route reader With ID: {this.Id} has completed reading.");
+        this.routeReaderRepository.Remove(this.Id);
     }
 
     private void KafkaReader_MessageReceived(object? sender, RoutingDataPacket e)

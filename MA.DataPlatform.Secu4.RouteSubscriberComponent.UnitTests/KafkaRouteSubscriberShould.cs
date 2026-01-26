@@ -15,8 +15,10 @@
 // limitations under the License.
 // </copyright>
 
+
 using FluentAssertions;
 
+using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
 using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
@@ -28,6 +30,7 @@ namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.UnitTests;
 public class KafkaRouteSubscriberShould
 {
     private readonly IKafkaListenerFactory listenerFactory = Substitute.For<IKafkaListenerFactory>();
+    private readonly IRouteReadingWritingComponentRepository<KafkaRouteSubscriber> routeSubscriberRepository = Substitute.For<IRouteReadingWritingComponentRepository<KafkaRouteSubscriber>>();
 
     [Fact]
     public void Raise_Event_On_Listener_MessageReceived_Event()
@@ -36,7 +39,8 @@ public class KafkaRouteSubscriberShould
         var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
 
         var routeManager = Substitute.For<IRouteManager>();
-        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        var logger = Substitute.For<ILogger>();
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager, logger, this.routeSubscriberRepository,"TestSubscriber");
         var listenMessageReceived = false;
         const string TopicName = "test";
         var kafkaRoute = new KafkaRoute(TopicName, TopicName);
@@ -73,6 +77,7 @@ public class KafkaRouteSubscriberShould
 
         //assert
         listenMessageReceived.Should().BeTrue();
+        this.routeSubscriberRepository.Received(1).Add(subscriber);
     }
 
     [Fact]
@@ -80,9 +85,9 @@ public class KafkaRouteSubscriberShould
     {
         //arrange
         var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-
+        var logger = Substitute.For<ILogger>();
         var routeManager = Substitute.For<IRouteManager>();
-        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager, logger, this.routeSubscriberRepository,"TestSubscriber");
         const string TopicName = "test";
         var kafkaRoute = new KafkaRoute(TopicName, TopicName);
         var listener = Substitute.For<IKafkaListener>();
@@ -103,6 +108,8 @@ public class KafkaRouteSubscriberShould
 
         //assert
         listener.Received(1).Stop();
+        this.routeSubscriberRepository.Received(1).Add(subscriber);
+        this.routeSubscriberRepository.Received(1).Remove(subscriber.Id);
     }
 
     [Fact]
@@ -110,9 +117,9 @@ public class KafkaRouteSubscriberShould
     {
         //arrange
         var configurationProvider = Substitute.For<IConsumingConfigurationProvider>();
-
+        var logger = Substitute.For<ILogger>();
         var routeManager = Substitute.For<IRouteManager>();
-        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager);
+        var subscriber = new KafkaRouteSubscriber(this.listenerFactory, configurationProvider, routeManager, logger,this.routeSubscriberRepository, "TestSubscriber");
         const string TopicName = "test";
         var kafkaRoute = new KafkaRoute(TopicName, TopicName);
         var listener = Substitute.For<IKafkaListener>();
@@ -132,5 +139,7 @@ public class KafkaRouteSubscriberShould
 
         //assert
         listener.Received(0).Stop();
+        this.routeSubscriberRepository.Received(1).Add(subscriber);
+        this.routeSubscriberRepository.Received(1).Remove(subscriber.Id);
     }
 }

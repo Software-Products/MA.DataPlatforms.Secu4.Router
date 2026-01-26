@@ -23,29 +23,28 @@ using NSubstitute;
 
 using Xunit;
 
-namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.BrokersPublishers.KafkaBroking
+namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.BrokersPublishers.KafkaBroking;
+
+public class KafkaQueueFullRetryExecutorShould
 {
-    public class KafkaQueueFullRetryExecutorShould
+    [Fact]
+    public void Log_The_Queue_Full_Message_And_Retry_After_500_ms()
     {
-        [Fact]
-        public void Log_The_Queue_Full_Message_And_Retry_After_500_ms()
+        //arrange
+        var producer = Substitute.For<IKafkaProducer>();
+        var logger = Substitute.For<ILogger>();
+        var executor = new KafkaQueueFullRetryExecutor(logger, producer);
+
+        //act
+        const string TestTopic = "test_topic";
+        var message = new byte[]
         {
-            //arrange
-            var producer = Substitute.For<IKafkaProducer>();
-            var logger = Substitute.For<ILogger>();
-            var executor = new KafkaQueueFullRetryExecutor(logger, producer);
+            1, 2, 3
+        };
+        executor.Execute(message, TestTopic);
 
-            //act
-            const string TestTopic = "test_topic";
-            var message = new byte[]
-            {
-                1, 2, 3
-            };
-            executor.Execute(message, TestTopic);
-
-            //assert
-            logger.Received(1).Error(Arg.Is<string>(i => i.EndsWith(":local queue full wait for 500ms for retry", StringComparison.Ordinal)));
-            producer.Received(1).Produce(message, TestTopic);
-        }
+        //assert
+        logger.Received(1).Error(Arg.Is<string>(i => i.EndsWith(":local queue full wait for 500ms for retry", StringComparison.Ordinal)));
+        producer.Received(1).Produce(message, TestTopic);
     }
 }

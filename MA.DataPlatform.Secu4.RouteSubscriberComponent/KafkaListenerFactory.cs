@@ -24,21 +24,18 @@ namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent;
 public class KafkaListenerFactory : IKafkaListenerFactory
 {
     private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
-    private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     private readonly ILogger logger;
 
     public KafkaListenerFactory(
         IConsumingConfigurationProvider consumingConfigurationProvider,
-        ICancellationTokenSourceProvider cancellationTokenSourceProvider,
         ILogger logger)
     {
         this.consumingConfigurationProvider = consumingConfigurationProvider;
-        this.cancellationTokenSourceProvider = cancellationTokenSourceProvider;
         this.logger = logger;
     }
 
     public IKafkaListener Create()
     {
-        return new KafkaListener(this.consumingConfigurationProvider, this.cancellationTokenSourceProvider, this.logger);
+        return new KafkaListener(this.consumingConfigurationProvider, this.logger);
     }
 }

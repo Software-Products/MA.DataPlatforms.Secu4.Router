@@ -27,63 +27,62 @@ using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.Common
+namespace MA.DataPlatforms.Secu4.RouterComponent.UnitTest.Common;
+
+public class KeyGeneratorServiceShould
 {
-    public class KeyGeneratorServiceShould
+    private readonly ITestOutputHelper outputHelper;
+    private readonly ILoggingDirectoryProvider loggingDirectoryProvider = Substitute.For<ILoggingDirectoryProvider>();
+    private readonly KeyGeneratorService keyGenerator;
+
+    public KeyGeneratorServiceShould(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper outputHelper;
-        private readonly ILoggingDirectoryProvider loggingDirectoryProvider = Substitute.For<ILoggingDirectoryProvider>();
-        private readonly KeyGeneratorService keyGenerator;
+        this.outputHelper = outputHelper;
+        this.loggingDirectoryProvider.Provide().Returns("");
+        this.keyGenerator = new KeyGeneratorService(this.loggingDirectoryProvider);
+    }
 
-        public KeyGeneratorServiceShould(ITestOutputHelper outputHelper)
+    [Fact]
+    public void Generate_Unique_Ulong_Key()
+    {
+        //arrange
+        const int NumberOfGeneratingKeys = 1_000_000;
+        var lstCreated = new List<ulong>();
+
+        //act
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+        for (var i = 0; i < NumberOfGeneratingKeys; i++)
         {
-            this.outputHelper = outputHelper;
-            this.loggingDirectoryProvider.Provide().Returns("");
-            this.keyGenerator = new KeyGeneratorService(this.loggingDirectoryProvider);
+            lstCreated.Add(this.keyGenerator.GenerateUlongKey());
         }
 
-        [Fact]
-        public void Generate_Unique_Ulong_Key()
+        stopWatch.Stop();
+
+        //assert
+        lstCreated.GroupBy(i => i).Any(i => i.Count() > 1).Should().Be(false);
+        this.outputHelper.WriteLine($"elapsed time to generate {NumberOfGeneratingKeys} keys: {stopWatch.ElapsedMilliseconds} ms");
+    }
+
+    [Fact]
+    public void Generate_Unique_String_Key()
+    {
+        //arrange
+        const int NumberOfGeneratingKeys = 1_000_000;
+        var lstCreated = new List<string>();
+
+        //act
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+        for (var i = 0; i < NumberOfGeneratingKeys; i++)
         {
-            //arrange
-            const int NumberOfGeneratingKeys = 1_000_000;
-            var lstCreated = new List<ulong>();
-
-            //act
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (var i = 0; i < NumberOfGeneratingKeys; i++)
-            {
-                lstCreated.Add(this.keyGenerator.GenerateUlongKey());
-            }
-
-            stopWatch.Stop();
-
-            //assert
-            lstCreated.GroupBy(i => i).Any(i => i.Count() > 1).Should().Be(false);
-            this.outputHelper.WriteLine($"elapsed time to generate {NumberOfGeneratingKeys} keys: {stopWatch.ElapsedMilliseconds} ms");
+            lstCreated.Add(this.keyGenerator.GenerateStringKey());
         }
 
-        [Fact]
-        public void Generate_Unique_String_Key()
-        {
-            //arrange
-            const int NumberOfGeneratingKeys = 1_000_000;
-            var lstCreated = new List<string>();
+        stopWatch.Stop();
 
-            //act
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (var i = 0; i < NumberOfGeneratingKeys; i++)
-            {
-                lstCreated.Add(this.keyGenerator.GenerateStringKey());
-            }
-
-            stopWatch.Stop();
-
-            //assert
-            lstCreated.GroupBy(i => i).Any(i => i.Count() > 1).Should().Be(false);
-            this.outputHelper.WriteLine($"elapsed time to generate {NumberOfGeneratingKeys} keys: {stopWatch.ElapsedMilliseconds} ms");
-        }
+        //assert
+        lstCreated.GroupBy(i => i).Any(i => i.Count() > 1).Should().Be(false);
+        this.outputHelper.WriteLine($"elapsed time to generate {NumberOfGeneratingKeys} keys: {stopWatch.ElapsedMilliseconds} ms");
     }
 }

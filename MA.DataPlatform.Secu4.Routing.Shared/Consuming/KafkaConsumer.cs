@@ -28,21 +28,22 @@ namespace MA.DataPlatforms.Secu4.Routing.Shared.Consuming;
 
 public abstract class KafkaConsumer : IKafkaConsumer
 {
+    private readonly ILogger logger;
     private readonly IConsumingConfigurationProvider consumingConfigurationProvider;
-    private readonly ICancellationTokenSourceProvider cancellationTokenSourceProvider;
     protected IConsumer<string?, byte[]>? Consumer;
     private CancellationTokenSource? cancellationTokenSource;
-    private bool stopped = false;
+    private bool stopped;
+    private bool disposed;
 
-    protected KafkaConsumer(IConsumingConfigurationProvider consumingConfigurationProvider, ICancellationTokenSourceProvider cancellationTokenSourceProvider)
+    protected KafkaConsumer(ILogger logger ,IConsumingConfigurationProvider consumingConfigurationProvider)
     {
+        this.logger = logger;
         this.consumingConfigurationProvider = consumingConfigurationProvider;
-        this.cancellationTokenSourceProvider = cancellationTokenSourceProvider;
     }
 
     public event EventHandler<RoutingDataPacket>? MessageReceived;
 
-    public IRoute Route { get; private set; } = new EmptyRoute();
+    public IKafkaRoute Route { get; private set; } = new KafkaEmptyRoute();
 
     public void Dispose()
     {
@@ -78,7 +79,7 @@ public abstract class KafkaConsumer : IKafkaConsumer
                 lstPartitions = GetPartitions(kafkaConfiguration, kafkaRoute.Topic);
             }
 
-            this.cancellationTokenSource = this.cancellationTokenSourceProvider.Provide();
+            this.cancellationTokenSource = new CancellationTokenSource();
             var token = this.cancellationTokenSource.Token;
 
             _ = Task.Run(() => this.StartReadingPartitions(kafkaConfiguration, lstPartitions, token), token);
@@ -91,16 +92,33 @@ public abstract class KafkaConsumer : IKafkaConsumer
 
     public void Stop()
     {
+        this.logger.Info($"Stopping {this.Route.Name} Consumer");
+        if (this.stopped)
+        {
+            this.logger.Info($"The {this.Route.Name} Consumer already stopped");
+            return;
+        }
+
         this.stopped = true;
         this.cancellationTokenSource?.Cancel();
+        this.cancellationTokenSource?.Dispose();
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        if (disposing)
+        if (this.disposed)
         {
-            this.Consumer?.Dispose();
+            return;
         }
+
+        if (!disposing)
+        {
+            return;
+        }
+
+        this.Stop();
+        this.Consumer?.Dispose();
+        this.disposed = true;
     }
 
     protected abstract void StartReadingPartitions(KafkaConsumingConfig kafkaConfiguration, IReadOnlyList<TopicPartition> lstPartitions, CancellationToken token);

@@ -24,7 +24,7 @@ public interface IKafkaConsumer : IDisposable
 {
     public event EventHandler<RoutingDataPacket> MessageReceived;
 
-    public IRoute Route { get; }
+    public IKafkaRoute Route { get; }
 
     public void StartListening(IKafkaRoute kafkaRoute);
 

@@ -1,23 +1,45 @@
 services:
-  router_integration_test_zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - 12181:2181   
-  
   router_integration_test_kafka_server:
-    image: confluentinc/cp-kafka:7.9.1
-    depends_on:
-      - router_integration_test_zookeeper
+    image: apache/kafka:4.1.1
+    container_name: router_integration_test_kafka_server
+    networks: [router_test_net]
     ports:
-      - 9092:9092 
+      - "9092:9092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: router_integration_test_zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://router_integration_test_kafka_server:9093,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1    
- 
+      # KRaft (no ZooKeeper): combined controller+broker single node
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+
+      # Listeners: internal (containers), controller (KRaft), and external (host)
+      KAFKA_LISTENERS: "PLAINTEXT://:9093,CONTROLLER://:9094,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://router_integration_test_kafka_server:9093,EXTERNAL://localhost:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@router_integration_test_kafka_server:9094"
+
+      # Single-broker friendly defaults
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Persist broker data (optional but recommended)
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+
+  router_integration_test_kafka_ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: router_integration_test_kafka_ui
+    networks: [router_test_net]
+    depends_on:
+      - router_integration_test_kafka_server
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      # Connect inside the Docker network to the internal listener
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: router_integration_test_kafka_server:9093
+      DYNAMIC_CONFIG_ENABLED: "true"
+
+networks:
+  router_test_net:
+    driver: bridge

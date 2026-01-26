@@ -19,6 +19,7 @@ using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
 using NSubstitute;
 
@@ -31,18 +32,27 @@ public class RouterShould
     private readonly ILogger logger = Substitute.For<ILogger>();
     private readonly IRoutingConfigurationProvider configurationProvider = Substitute.For<IRoutingConfigurationProvider>();
     private readonly IKafkaProducerHolderBuilder kafkaProducerBuilder = Substitute.For<IKafkaProducerHolderBuilder>();
+    private readonly IRouteReadingWritingComponentRepository<KafkaRouter> routerRepository = Substitute.For<IRouteReadingWritingComponentRepository<KafkaRouter>>();
+
 
     [Fact]
     public void Broker_Publisher_Initiate_Call_After_Initiate()
     {
         //arrange 
         this.configurationProvider.Provide().Returns(new RoutingConfiguration(new KafkaRoutingConfig(new KafkaPublishingConfig(), [], [], "")));
-        var router = new Router(this.logger, this.kafkaProducerBuilder);
+        var router = new KafkaRouter(this.logger, this.kafkaProducerBuilder, this.routerRepository, "TestRouter");
 
         //act
         router.Initiate();
 
         //assert
         this.kafkaProducerBuilder.Received(1).Build();
+        this.routerRepository.Received(1).Add(router);
+
+        //act
+        router.ShutDown();
+
+        //assert
+        this.routerRepository.Received(1).Remove(router.Id);
     }
 }

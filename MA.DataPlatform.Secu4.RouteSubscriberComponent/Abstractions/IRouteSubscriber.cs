@@ -16,15 +16,15 @@
 // </copyright>
 
 using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Abstractions;
 
-namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions
+namespace MA.DataPlatforms.Secu4.RouteSubscriberComponent.Abstractions;
+
+public interface IRouteSubscriber : IRouteReadingWritingComponent
 {
-    public interface IRouteSubscriber
-    {
-        public event EventHandler<RoutingDataPacket> PacketReceived;
+    public event EventHandler<RoutingDataPacket> PacketReceived;
 
-        public void Subscribe();
+    public void Subscribe();
 
-        public void Unsubscribe();
-    }
+    public void Unsubscribe();
 }
