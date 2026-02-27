@@ -135,7 +135,7 @@ public abstract class KafkaConsumer : IKafkaConsumer
 
     protected static Offset GetOffset(KafkaConsumingConfig kafkaConfiguration)
     {
-        return (kafkaConfiguration.KafkaListeningConfig.Offset ?? 0) >= 0 ? new Offset(kafkaConfiguration.KafkaListeningConfig.Offset ?? 0) : Offset.End;
+        return (kafkaConfiguration.KafkaListeningConfig.Offset ?? 0) >= 0 ? new Offset(kafkaConfiguration.KafkaListeningConfig.Offset ?? 0) : Offset.Stored;
     }
 
     private static List<TopicPartition> GetPartitions(KafkaConsumingConfig kafkaConfiguration, string topic)
