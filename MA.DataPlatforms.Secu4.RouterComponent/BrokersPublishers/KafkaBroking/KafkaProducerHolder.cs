@@ -60,7 +60,8 @@ public sealed class KafkaProducerHolder : IKafkaProducerHolder
         var kafkaRouteManagementInfo = new KafkaRoutingManagementInfo(
             this.routingConfiguration.KafkaRoutingConfig.KafkaPublishingConfig.Server,
             routes,
-            this.routingConfiguration.KafkaRoutingConfig.RoutesMetaData);
+            this.routingConfiguration.KafkaRoutingConfig.RoutesMetaData,
+            this.routingConfiguration.KafkaRoutingConfig.Security);
         this.routeManager.CheckRoutes(kafkaRouteManagementInfo);
         this.Producer.Initiate();
     }

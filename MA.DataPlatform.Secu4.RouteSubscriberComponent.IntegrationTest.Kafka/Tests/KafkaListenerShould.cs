@@ -239,8 +239,11 @@ public class KafkaListenerShould
             ]));
         kafkaListener.MessageReceived += (s, e) =>
         {
-            this.KafkaListener_MessageReceived(s, e);
+            // Increment before the handler runs: the handler calls autoResetEvent.Set(),
+            // which releases the waiting test thread. If counter++ ran after that Set(),
+            // the assert on line ~251 could read counter before the increment landed.
             counter++;
+            this.KafkaListener_MessageReceived(s, e);
         };
         kafkaListener.StartListening(kafkaRoute);
 
@@ -249,6 +252,12 @@ public class KafkaListenerShould
 
         var autoResetEvent = new AutoResetEvent(false);
         this.autoResetEvents.Add(kafkaRoute.Name, autoResetEvent);
+
+        // Give the consumer group time to complete partition assignment before producing,
+        // otherwise the listener can occasionally miss the message and the 30s wait elapses
+        // with counter == 0 (matches the warmup used by the other tests in this file).
+        Task.Delay(TimeSpan.FromMilliseconds(6000)).Wait();
+
         //act
         this.kafkaProducer.Produce(data, kafkaRoute);
 

@@ -1,0 +1,29 @@
+{
+    "_comment": "Drop this file as kafka-publisher-broker.json alongside your app. It overrides ONLY the Kafka broker connection settings on top of routes/design config that already exist in your code. No code changes needed — just wrap your existing provider: new JsonKafkaPublisherBrokerOverrideProvider(existingProvider)",
+    "bootstrapServers": "localhost:9092",
+    "clientId": null,
+    "compressionType": "none",
+    "compressionLevel": -1,
+    "lingerMs": 20,
+    "batchSize": 4194304,
+    "queueBufferingMaxMessages": 0,
+    "queueBufferingMaxKbytes": 0,
+    "messageMaxBytes": 1000000,
+    "messageTimeoutMs": 300000,
+    "requestTimeoutMs": 30000,
+    "acks": "all",
+    "maxInFlight": 1000000,
+    "enableIdempotence": false,
+    "transactionalId": null,
+    "security": {
+        "_comment": "Sensitive values use ${ENV_VAR_NAME} placeholders (env vars), or pass a MicrosoftConfigurationSecretResolver to pull from Azure Key Vault, AWS Secrets Manager, HashiCorp Vault, etc.",
+        "protocol": "Plaintext",
+        "saslMechanism": null,
+        "saslUsername": "${KAFKA_SASL_USERNAME}",
+        "saslPassword": "${KAFKA_SASL_PASSWORD}",
+        "sslCaLocation": null,
+        "sslCertificateLocation": null,
+        "sslKeyLocation": "${KAFKA_SSL_KEY_LOCATION}",
+        "sslKeyPassword": "${KAFKA_SSL_KEY_PASSWORD}"
+    }
+}

@@ -17,69 +17,39 @@
 
 namespace MA.DataPlatforms.Secu4.Routing.Contracts;
 
+/// <summary>
+/// Kafka-specific producer broker configuration. Broker tuning settings are
+/// expressed as raw librdkafka key/value pairs in <see cref="Properties"/> and
+/// applied to the Confluent <c>ProducerConfig</c> via <c>Set</c>.
+/// </summary>
 public class KafkaPublishingConfig
 {
     public KafkaPublishingConfig()
-        : this("localhost:9092", -1, 0, 0, 0, 0)
+        : this("localhost:9092")
     {
     }
 
-    public KafkaPublishingConfig(
-        string server,
-        int compressionLevel,
-        int compressionType,
-        int linger,
-        int queueMaxItem,
-        int queueMaxSize)
+    public KafkaPublishingConfig(string server, IReadOnlyDictionary<string, string>? properties = null)
     {
         this.Server = server;
-        this.CompressionLevel = compressionLevel;
-        this.CompressionType = compressionType;
-        this.Linger = linger;
-        this.QueueMaxItem = queueMaxItem;
-        this.QueueMaxSize = queueMaxSize;
+        this.Properties = properties ?? new Dictionary<string, string>();
     }
 
-    public string Server { get; }
+    /// <summary>
+    /// Raw librdkafka properties (e.g. <c>linger.ms</c>, <c>compression.type</c>) applied to the
+    /// Confluent producer config via <c>Set</c>. Keys not present here keep the
+    /// Confluent/librdkafka default.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> Properties { get; private set; }
 
-    public int CompressionLevel { get; }
-
-    public int CompressionType { get; }
-
-    public int Linger { get; }
-
-    public int QueueMaxItem { get; }
-
-    public int QueueMaxSize { get; }
-}
-
-public class KafkaListeningConfig
-{
-    public KafkaListeningConfig()
-        : this("localhost:9092", Guid.NewGuid().ToString(), AutoOffsetResetMode.Latest, null)
+    /// <summary>Returns a copy of this config with the given raw librdkafka <paramref name="properties"/>.</summary>
+    public KafkaPublishingConfig WithProperties(IReadOnlyDictionary<string, string> properties)
     {
+        var clone = (KafkaPublishingConfig)this.MemberwiseClone();
+        clone.Properties = properties;
+        return clone;
     }
 
-    public KafkaListeningConfig(string server, string groupId, AutoOffsetResetMode autoOffsetResetMode, long? offset)
-    {
-        this.Server = server;
-        this.GroupId = groupId;
-        this.AutoOffsetResetMode = autoOffsetResetMode;
-        this.Offset = offset;
-    }
-
+    /// <summary>Bootstrap servers (comma-separated host:port).</summary>
     public string Server { get; }
-
-    public string GroupId { get; }
-
-    public AutoOffsetResetMode AutoOffsetResetMode { get; }
-
-    public long? Offset { get; }
-}
-
-public enum AutoOffsetResetMode
-{
-    Latest = 0,
-    Earliest = 1,
-    FromOffset = 2,
 }

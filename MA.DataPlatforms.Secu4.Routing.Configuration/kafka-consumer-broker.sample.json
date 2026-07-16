@@ -1,0 +1,26 @@
+{
+    "_comment": "Drop this file as kafka-consumer-broker.json alongside your app. It overrides ONLY the Kafka broker connection settings on top of routes/design config that already exist in your code. No code changes needed — just wrap your existing provider: new JsonKafkaConsumerBrokerOverrideProvider(existingProvider). Per-route settings preserved from code: route name, topic, partition, autoOffsetReset mode, explicit start offset.",
+    "bootstrapServers": "localhost:9092",
+    "groupId": "my-consumer-group",
+    "clientId": null,
+    "enableAutoCommit": true,
+    "autoCommitIntervalMs": 5000,
+    "heartbeatIntervalMs": 3000,
+    "sessionTimeoutMs": 30000,
+    "maxPollIntervalMs": 300000,
+    "fetchMaxBytes": 52428800,
+    "maxPartitionFetchBytes": 1048576,
+    "fetchMinBytes": 1,
+    "fetchWaitMaxMs": 500,
+    "security": {
+        "_comment": "Sensitive values use ${ENV_VAR_NAME} placeholders (env vars), or pass a MicrosoftConfigurationSecretResolver to pull from Azure Key Vault, AWS Secrets Manager, HashiCorp Vault, etc.",
+        "protocol": "Plaintext",
+        "saslMechanism": null,
+        "saslUsername": "${KAFKA_SASL_USERNAME}",
+        "saslPassword": "${KAFKA_SASL_PASSWORD}",
+        "sslCaLocation": null,
+        "sslCertificateLocation": null,
+        "sslKeyLocation": "${KAFKA_SSL_KEY_LOCATION}",
+        "sslKeyPassword": "${KAFKA_SSL_KEY_PASSWORD}"
+    }
+}

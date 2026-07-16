@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Title>MA.DataPlatforms.Secu4.Routing.Configuration</Title>
+		<Company>Motion Applied</Company>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<Authors>Motion Applied</Authors>
+		<Description>JSON-file based configuration provider for the Secu4 routing library. Exposes all Kafka broker options through two JSON files (kafka-publisher.json / kafka-consumer.json) with a clear split between routing-design settings and Kafka-specific broker settings. Sensitive values are resolved from environment variables at runtime.</Description>
+		<RepositoryUrl>https://github.com/mat-docs/packages</RepositoryUrl>
+		<LangVersion>12.0</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatforms.Secu4.Routing.Contracts.csproj" />
+		<ProjectReference Include="..\MA.DataPlatforms.Secu4.RouterComponent\MA.DataPlatforms.Secu4.RouterComponent.csproj" />
+		<ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Shared\MA.DataPlatforms.Secu4.Routing.Shared.csproj" />
+	</ItemGroup>
+
+</Project>

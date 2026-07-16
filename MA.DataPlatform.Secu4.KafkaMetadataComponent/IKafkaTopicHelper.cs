@@ -15,13 +15,15 @@
 // limitations under the License.
 // </copyright>
 
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+
 namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent;
 
 public interface IKafkaTopicHelper
 {
-    IReadOnlyList<TopicInfo> GetInfoByTopicPrefix(string brokerUrl, string namePrefix);
+    IReadOnlyList<TopicInfo> GetInfoByTopicPrefix(string brokerUrl, string namePrefix, KafkaSecurityConfig? security = null);
 
-    IReadOnlyList<TopicInfo> GetInfoByTopicSuffix(string brokerUrl, string nameSuffix);
+    IReadOnlyList<TopicInfo> GetInfoByTopicSuffix(string brokerUrl, string nameSuffix, KafkaSecurityConfig? security = null);
 
-    IReadOnlyList<TopicInfo> GetInfoByTopicContains(string brokerUrl, string nameSubString);
+    IReadOnlyList<TopicInfo> GetInfoByTopicContains(string brokerUrl, string nameSubString, KafkaSecurityConfig? security = null);
 }

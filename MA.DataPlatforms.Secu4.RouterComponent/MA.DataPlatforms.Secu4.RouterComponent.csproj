@@ -21,7 +21,7 @@
 		<OutputPath>..\bin\Release\</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Confluent.Kafka" Version="2.6.1" />
+		<PackageReference Include="Confluent.Kafka" Version="2.15.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\MA.DataPlatform.Secu4.Routing.Contracts\MA.DataPlatforms.Secu4.Routing.Contracts.csproj" />

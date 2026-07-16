@@ -54,6 +54,7 @@ public class KafkaRouteManager : IRouteManager
                 {
                     BootstrapServers = routingManagementInfo.Url
                 };
+                KafkaSecurityApplier.Apply(adminConfig, routingManagementInfo.Security);
                 adminClient = new AdminClientBuilder(adminConfig).Build();
                 this.adminClients.Add(routingManagementInfo.Url, adminClient);
             }

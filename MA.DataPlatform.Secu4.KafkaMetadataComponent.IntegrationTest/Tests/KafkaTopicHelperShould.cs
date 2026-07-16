@@ -17,6 +17,8 @@
 
 using FluentAssertions;
 
+using MA.Common;
+using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Base;
 using MA.DataPlatforms.Secu4.KafkaMetadataComponent.IntegrationTest.Helper;
 using MA.DataPlatforms.Secu4.Routing.Contracts;
@@ -29,7 +31,6 @@ public class KafkaTopicHelperShould
     private const string Server = "localhost:9099";
     private const int DataBytesLength = 20;
     private readonly KafkaHelperProducer kafkaProducer;
-
     public KafkaTopicHelperShould(RunKafkaDockerComposeFixture dockerComposeFixture)
     {
         this.DockerComposeFixture = dockerComposeFixture;
@@ -65,7 +66,7 @@ public class KafkaTopicHelperShould
 
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicPrefix(Server, prefix);
 
@@ -119,7 +120,7 @@ public class KafkaTopicHelperShould
 
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicPrefix(Server, prefix);
 
@@ -182,7 +183,7 @@ public class KafkaTopicHelperShould
 
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicPrefix(Server, prefix);
 
@@ -233,7 +234,7 @@ public class KafkaTopicHelperShould
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic5, 3));
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicPrefix(Server, prefix);
 
@@ -284,7 +285,7 @@ public class KafkaTopicHelperShould
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic5, 1));
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicSuffix(Server, nameSuffix);
 
@@ -335,7 +336,7 @@ public class KafkaTopicHelperShould
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic5, 3));
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicContains(Server, subString);
 
@@ -394,7 +395,7 @@ public class KafkaTopicHelperShould
         new KafkaHelperTopicCreator(Server).Create(new KafkaTopicMetaData(topic5, 1));
         Task.Delay(5000).Wait();
 
-        var topicHelper = new KafkaTopicHelper();
+        var topicHelper = new KafkaTopicHelper(new ConsoleLogger());
         //act
         var result = topicHelper.GetInfoByTopicContains(Server, string.Empty);
 
