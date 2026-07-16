@@ -1,0 +1,48 @@
+{
+    "_comment": "Copy this file to kafka-consumer.json and edit as needed. Remove any property to accept the default. See comments inline.",
+    "design": {
+        "_comment": "Routing-design settings — broker-agnostic. Safe to commit to source control.",
+        "routes": [
+            {
+                "name": "my-route",
+                "topic": "my-topic",
+                "partition": null,
+                "autoOffsetReset": "Latest",
+                "fromOffset": null
+            }
+        ],
+        "topicsMetaData": [
+            {
+                "topic": "my-topic",
+                "numberOfPartitions": 1,
+                "replicationFactor": 1
+            }
+        ]
+    },
+    "kafkaBroker": {
+        "_comment": "Kafka-specific consumer settings — would change if the broker type changes. One kafkaBroker block applies to all routes in this file.",
+        "bootstrapServers": "localhost:9092",
+        "groupId": "my-consumer-group",
+        "clientId": null,
+        "enableAutoCommit": true,
+        "autoCommitIntervalMs": 5000,
+        "heartbeatIntervalMs": 3000,
+        "sessionTimeoutMs": 30000,
+        "maxPollIntervalMs": 300000,
+        "fetchMaxBytes": 52428800,
+        "maxPartitionFetchBytes": 1048576,
+        "fetchMinBytes": 1,
+        "fetchWaitMaxMs": 500,
+        "security": {
+            "_comment": "Sensitive values use ${ENV_VAR_NAME} placeholders. They are resolved from environment variables at startup so secrets never have to be stored in this file.",
+            "protocol": "Plaintext",
+            "saslMechanism": null,
+            "saslUsername": "${KAFKA_SASL_USERNAME}",
+            "saslPassword": "${KAFKA_SASL_PASSWORD}",
+            "sslCaLocation": null,
+            "sslCertificateLocation": null,
+            "sslKeyLocation": "${KAFKA_SSL_KEY_LOCATION}",
+            "sslKeyPassword": "${KAFKA_SSL_KEY_PASSWORD}"
+        }
+    }
+}

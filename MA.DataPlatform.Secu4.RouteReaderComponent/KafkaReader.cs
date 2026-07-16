@@ -86,9 +86,5 @@ public class KafkaReader : KafkaConsumer, IKafkaReader
         {
             this.logger.Error(ex.ToString());
         }
-        finally
-        {
-            this.Consumer?.Dispose();
-        }
     }
 }

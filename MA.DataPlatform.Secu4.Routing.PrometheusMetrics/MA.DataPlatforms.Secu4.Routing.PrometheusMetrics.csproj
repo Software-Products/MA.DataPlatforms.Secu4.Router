@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Title>MA.DataPlatform.Secu4.Routing.PrometheusMetrics</Title>
+		<Company>Motion Applied</Company>
+		<Authors>Motion Applied</Authors>
+		<Description>Prometheus metrics for the SECU4 router: produce/consume counters and the actual librdkafka client state (internal queue depth, in-flight, consumer lag).</Description>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/mat-docs/packages</RepositoryUrl>
+		<LangVersion>12.0</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<OutputPath>..\bin\Debug\</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<OutputPath>..\bin\Release\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="prometheus-net" Version="4.2.0" />
+	</ItemGroup>
+
+</Project>

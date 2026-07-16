@@ -73,7 +73,7 @@ public class KafkaProducerShould
         this.routingConfigurationProvider.Provide().Returns(
             new RoutingConfiguration(
                 new KafkaRoutingConfig(
-                    new KafkaPublishingConfig(),
+                    new KafkaPublishingConfig(Server, new Dictionary<string, string> { ["linger.ms"] = "20", ["batch.size"] = "4194304" }),
                     kafkaRoutes,
                     routesMetaData,
                     "deadLetter")));
@@ -119,7 +119,7 @@ public class KafkaProducerShould
         this.routingConfigurationProvider.Provide().Returns(
             new RoutingConfiguration(
                 new KafkaRoutingConfig(
-                    new KafkaPublishingConfig(),
+                    new KafkaPublishingConfig(Server, new Dictionary<string, string> { ["linger.ms"] = "20", ["batch.size"] = "4194304" }),
                     kafkaRoutes,
                     routesMetaData,
                     "deadLetter")));

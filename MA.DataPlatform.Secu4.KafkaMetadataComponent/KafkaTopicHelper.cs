@@ -17,99 +17,128 @@
 
 using Confluent.Kafka;
 
+using MA.Common.Abstractions;
+using MA.DataPlatforms.Secu4.Routing.Contracts;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
+
 namespace MA.DataPlatforms.Secu4.KafkaMetadataComponent;
 
 public class KafkaTopicHelper : IKafkaTopicHelper
 {
-    public IReadOnlyList<TopicInfo> GetInfoByTopicContains(string brokerUrl, string nameSubString)
+    private readonly ILogger logger;
+
+    public KafkaTopicHelper(ILogger logger)
+    {
+        this.logger = logger;
+    }
+
+    public IReadOnlyList<TopicInfo> GetInfoByTopicContains(string brokerUrl, string nameSubString, KafkaSecurityConfig? security = null)
     {
         var result = new List<TopicInfo>();
-        var topicsMetadata = GetTopicsMetaDataContainsSubString(brokerUrl, nameSubString);
-        return ExtractTopicInfo(brokerUrl, topicsMetadata, result);
+        var topicsMetadata = GetTopicsMetaDataByCondition(brokerUrl, t => t.Topic.Contains(nameSubString, StringComparison.OrdinalIgnoreCase), security);
+        return this.ExtractTopicInfo(brokerUrl, topicsMetadata, result, security);
     }
 
-    public IReadOnlyList<TopicInfo> GetInfoByTopicPrefix(string brokerUrl, string namePrefix)
+    public IReadOnlyList<TopicInfo> GetInfoByTopicPrefix(string brokerUrl, string namePrefix, KafkaSecurityConfig? security = null)
     {
         var result = new List<TopicInfo>();
-        var topicsMetadata = GetTopicsMetaDataWithPrefix(brokerUrl, namePrefix);
-        return ExtractTopicInfo(brokerUrl, topicsMetadata, result);
+        var topicsMetadata = GetTopicsMetaDataByCondition(brokerUrl, t => t.Topic.StartsWith(namePrefix, StringComparison.OrdinalIgnoreCase), security);
+        return this.ExtractTopicInfo(brokerUrl, topicsMetadata, result, security);
     }
 
-    public IReadOnlyList<TopicInfo> GetInfoByTopicSuffix(string brokerUrl, string nameSuffix)
+    public IReadOnlyList<TopicInfo> GetInfoByTopicSuffix(string brokerUrl, string nameSuffix, KafkaSecurityConfig? security = null)
     {
         var result = new List<TopicInfo>();
-        var topicsMetadata = GetTopicsMetaDataWithSuffix(brokerUrl, nameSuffix);
-        return ExtractTopicInfo(brokerUrl, topicsMetadata, result);
+        var topicsMetadata = GetTopicsMetaDataByCondition(brokerUrl, t => t.Topic.EndsWith(nameSuffix, StringComparison.OrdinalIgnoreCase), security);
+        return this.ExtractTopicInfo(brokerUrl, topicsMetadata, result, security);
     }
 
-    private static IReadOnlyList<TopicInfo> ExtractTopicInfo(string brokerUrl, List<TopicMetadata> topicsMetadata, List<TopicInfo> result)
-    {
-        foreach (var topicMetadata in topicsMetadata)
-        {
-            var partitions = topicMetadata.Partitions;
-            using var consumer = new ConsumerBuilder<Ignore, Ignore>(
-                new ConsumerConfig
-                {
-                    GroupId = Guid.NewGuid().ToString(),
-                    BootstrapServers = brokerUrl,
-                    AutoOffsetReset = AutoOffsetReset.Earliest
-                }).Build();
-
-            result.AddRange(GeOffsetInfo(partitions, topicMetadata, consumer));
-        }
-
-        return result;
-    }
-
-    private static List<TopicMetadata> GetTopicsMetaDataContainsSubString(string brokerUrl, string nameSubString)
-    {
-        return GetTopicsMetaDataByCondition(
-            brokerUrl,
-            (t)
-                => t.Topic.Contains(nameSubString, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static List<TopicMetadata> GetTopicsMetaDataByCondition(string brokerUrl, Func<TopicMetadata, bool> predicate)
+    private static List<TopicMetadata> GetTopicsMetaDataByCondition(string brokerUrl, Func<TopicMetadata, bool> predicate, KafkaSecurityConfig? security)
     {
         var config = new AdminClientConfig
         {
             BootstrapServers = brokerUrl
         };
+        KafkaSecurityApplier.Apply(config, security);
 
         using var adminClient = new AdminClientBuilder(config).Build();
         var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
-        var topicMetadata = metadata.Topics
-            .Where(predicate)
-            .ToList();
-        return topicMetadata;
+        return metadata.Topics.Where(predicate).ToList();
     }
 
-    private static List<TopicMetadata> GetTopicsMetaDataWithPrefix(string brokerUrl, string namePrefix)
+    private List<TopicInfo> ExtractTopicInfo(string brokerUrl, List<TopicMetadata> topicsMetadata, List<TopicInfo> result, KafkaSecurityConfig? security)
     {
-        return GetTopicsMetaDataByCondition(
-            brokerUrl,
-            (t)
-                => t.Topic.StartsWith(namePrefix, StringComparison.OrdinalIgnoreCase));
+        if (topicsMetadata.Count == 0)
+        {
+            return result;
+        }
+
+        var consumerConfig = new ConsumerConfig
+        {
+            GroupId = Guid.NewGuid().ToString(),
+            BootstrapServers = brokerUrl,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            // Metadata-only consumer: it never consumes or commits, so keep the
+            // group-coordinator machinery out of the picture entirely.
+            EnableAutoCommit = false,
+        };
+        KafkaSecurityApplier.Apply(consumerConfig, security);
+
+        using var consumer = new ConsumerBuilder<Ignore, Ignore>(consumerConfig)
+            .SetLogHandler((_, log) => KafkaClientLogRouter.Route(this.logger, "Kafka metadata consumer", log))
+            .SetErrorHandler((_, error) => KafkaClientLogRouter.Route(this.logger, "Kafka metadata consumer", error))
+            .Build();
+
+        foreach (var topicMetadata in topicsMetadata)
+        {
+            result.AddRange(this.GetOffsetInfo(topicMetadata.Partitions, topicMetadata, consumer));
+        }
+
+        try
+        {
+            consumer.Close();
+        }
+        catch (KafkaException ex)
+        {
+            this.logger.Warning($"Closing the Kafka metadata consumer failed: {ex.Message}");
+        }
+
+        return result;
     }
 
-    private static List<TopicMetadata> GetTopicsMetaDataWithSuffix(string brokerUrl, string namePostfix)
-    {
-        return GetTopicsMetaDataByCondition(
-            brokerUrl,
-            (t)
-                => t.Topic.EndsWith(namePostfix, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static IEnumerable<TopicInfo> GeOffsetInfo(
+    private List<TopicInfo> GetOffsetInfo(
         IEnumerable<PartitionMetadata> partitions,
         TopicMetadata topicMetadata,
         IConsumer<Ignore, Ignore> consumer)
     {
-        var topicPartitions = partitions.Select(partition => new TopicPartition(topicMetadata.Topic, new Partition(partition.PartitionId))).ToList();
+        var topicPartitions = partitions
+            .Select(p => new TopicPartition(topicMetadata.Topic, new Partition(p.PartitionId)))
+            .ToList();
         consumer.Assign(topicPartitions);
+        var infos = new List<TopicInfo>();
+        foreach (var tp in topicPartitions)
+        {
+            long high = 0;
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                try
+                {
+                    high = consumer.QueryWatermarkOffsets(tp, TimeSpan.FromSeconds(15)).High;
+                    break;
+                }
+                catch (KafkaException ex)
+                {
+                    if (attempt == 2)
+                    {
+                        this.logger.Error(
+                            $"Failed to query watermark offsets for {tp.Topic}[{tp.Partition.Value}] after 3 attempts, defaulting to 0: {ex.Message}");
+                    }
+                }
+            }
 
-        return (from topicPartition in topicPartitions
-            let endOffsets = consumer.QueryWatermarkOffsets(topicPartition, TimeSpan.FromSeconds(10))
-            select new TopicInfo(topicPartition.Topic, topicPartition.Partition.Value, endOffsets.High)).ToList();
+            infos.Add(new TopicInfo(tp.Topic, tp.Partition.Value, high));
+        }
+
+        return infos;
     }
 }

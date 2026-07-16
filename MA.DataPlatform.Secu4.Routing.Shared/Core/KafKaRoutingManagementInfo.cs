@@ -21,11 +21,16 @@ namespace MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 public class KafkaRoutingManagementInfo
 {
-    public KafkaRoutingManagementInfo(string url, IReadOnlyList<KafkaRoute> routes, IReadOnlyList<KafkaTopicMetaData> metaData)
+    public KafkaRoutingManagementInfo(
+        string url,
+        IReadOnlyList<KafkaRoute> routes,
+        IReadOnlyList<KafkaTopicMetaData> metaData,
+        KafkaSecurityConfig? security = null)
     {
         this.Url = url;
         this.Routes = routes;
         this.MetaData = metaData;
+        this.Security = security;
     }
 
     public string Url { get; }
@@ -33,4 +38,6 @@ public class KafkaRoutingManagementInfo
     public IReadOnlyList<KafkaRoute> Routes { get; }
 
     public IReadOnlyList<KafkaTopicMetaData> MetaData { get; }
+
+    public KafkaSecurityConfig? Security { get; }
 }

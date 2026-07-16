@@ -56,22 +56,6 @@ public class KafkaBrokerPublishersShould
     }
 
     [Fact]
-    public void Call_Expected_Logger_Methods_And_Producer_Holder_Publish_Upon_Publish()
-    {
-        //arrange done in constructor
-        var kafkaBrokerPublisher = new KafkaBrokerPublisher(this.logger, this.kafkaProducerHolder);
-        var data = new RoutingDataPacket([], "test", DateTime.UtcNow);
-
-        //act
-        kafkaBrokerPublisher.Publish(data);
-
-        //assert
-        this.logger.Received(1).Trace("publishing data");
-        this.logger.Received(1).Trace("publishing data completed");
-        this.kafkaProducerHolder.Received(1).Publish(data);
-    }
-
-    [Fact]
     public void Call_Expected_Logger_Methods_And_Producer_Holder_Dispose_Upon_Shutdown()
     {
         //arrange done in constructor

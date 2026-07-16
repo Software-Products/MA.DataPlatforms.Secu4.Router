@@ -22,16 +22,26 @@ public class KafkaConsumingConfig
     public KafkaConsumingConfig(
         KafkaListeningConfig kafkaListeningConfig,
         KafkaRoute kafkaRoutes,
-        KafkaTopicMetaData routesMetaData)
+        KafkaTopicMetaData routesMetaData,
+        KafkaSecurityConfig? security = null)
     {
         this.KafkaListeningConfig = kafkaListeningConfig;
         this.KafkaRoutes = kafkaRoutes;
         this.RoutesMetaData = routesMetaData;
+        this.Security = security;
     }
 
+    /// <summary>Kafka-specific broker settings for this consumer.</summary>
     public KafkaListeningConfig KafkaListeningConfig { get; }
 
+    /// <summary>Design-relative: the route this consumer listens on.</summary>
     public KafkaRoute KafkaRoutes { get; }
 
+    /// <summary>Design-relative: metadata used for topic auto-creation.</summary>
     public KafkaTopicMetaData RoutesMetaData { get; }
+
+    /// <summary>Optional Kafka broker authentication/authorisation settings.
+    /// Sensitive values should be injected via environment variables.
+    /// </summary>
+    public KafkaSecurityConfig? Security { get; }
 }

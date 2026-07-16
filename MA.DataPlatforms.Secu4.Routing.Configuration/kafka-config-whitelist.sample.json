@@ -1,0 +1,18 @@
+{
+    "_comment": "Optional whitelist controlling which broker-config-file properties may override the running Kafka config. Ordered, first-match-wins ('first pass, first pick'). Patterns are wildcard (* = any sequence, ? = single char) and match Confluent.Kafka property names case-insensitively. A property matching no rule is denied. If this whole file is absent, every property in the broker config files is applied.",
+
+    "publish": [
+        { "pattern": "compression.*", "allow": true },
+        { "pattern": "linger.ms", "allow": true },
+        { "pattern": "batch.size", "allow": true },
+        { "pattern": "queue.buffering.*", "allow": true },
+        { "pattern": "acks", "allow": true },
+        { "pattern": "message.max.bytes", "allow": true },
+        { "pattern": "*", "allow": false }
+    ],
+
+    "consume": [
+        { "_comment": "Deny one specific property even though the next rule would allow it (first-match-wins).", "pattern": "group.id", "allow": false },
+        { "pattern": "*", "allow": true }
+    ]
+}

@@ -33,15 +33,20 @@ public class KafkaRoutingManagementInfoCreator : IKafkaRoutingManagementInfoCrea
     public List<KafkaRoutingManagementInfo> CreateRouteManagementInfo()
     {
         var config = this.configurationProvider.Provide();
-        var kafkaRoutingManagementInfos = config.KafkaConsumingConfigs.Select(i => new
+        var kafkaRoutingManagementInfos = config.KafkaConsumingConfigs
+            .Select(i => new
             {
                 i.KafkaListeningConfig.Server,
                 i.KafkaRoutes,
-                i.RoutesMetaData
-            }).GroupBy(i => i.Server).Select(i => new KafkaRoutingManagementInfo(
+                i.RoutesMetaData,
+                i.Security
+            })
+            .GroupBy(i => i.Server)
+            .Select(i => new KafkaRoutingManagementInfo(
                 i.Key,
                 i.Select(j => j.KafkaRoutes).ToList(),
-                i.Select(j => j.RoutesMetaData).Distinct(this.comparer).ToList()))
+                i.Select(j => j.RoutesMetaData).Distinct(this.comparer).ToList(),
+                i.Select(j => j.Security).FirstOrDefault(s => s is not null)))
             .ToList();
         return kafkaRoutingManagementInfos;
     }

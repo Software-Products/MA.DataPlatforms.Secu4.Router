@@ -21,6 +21,8 @@ using MA.Common;
 using MA.Common.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions;
 using MA.DataPlatforms.Secu4.RouterComponent.Abstractions.Broking.KafkaBroking;
+using MA.DataPlatforms.Secu4.Routing.PrometheusMetrics;
+using MA.DataPlatforms.Secu4.Routing.Shared.Core;
 
 namespace MA.DataPlatforms.Secu4.RouterComponent.BrokersPublishers.KafkaBroking.Producing;
 
@@ -49,21 +51,24 @@ public class KafkaProducer : IKafkaProducer
 
     public void Initiate()
     {
-        var kafkaConfig = this.routingConfigurationProvider.Provide().KafkaRoutingConfig.KafkaPublishingConfig;
+        var routingConfig = this.routingConfigurationProvider.Provide().KafkaRoutingConfig;
+        var kafkaConfig = routingConfig.KafkaPublishingConfig;
+
         var producerConfig = new ProducerConfig
         {
             BootstrapServers = kafkaConfig.Server,
-            CompressionType = (CompressionType)kafkaConfig.CompressionType,
-            CompressionLevel = kafkaConfig.CompressionLevel,
-            QueueBufferingMaxKbytes = kafkaConfig.QueueMaxSize > 0
-                ? kafkaConfig.QueueMaxSize
-                : null,
-            QueueBufferingMaxMessages = kafkaConfig.QueueMaxItem > 0
-                ? kafkaConfig.QueueMaxItem
-                : null,
-            LingerMs = kafkaConfig.Linger > 0 ? kafkaConfig.Linger : null
         };
-        this.producer = new ProducerBuilder<string?, byte[]>(producerConfig).Build();
+
+        KafkaSecurityApplier.Apply(producerConfig, routingConfig.Security);
+
+        foreach (var property in kafkaConfig.Properties)
+        {
+            producerConfig.Set(property.Key, property.Value);
+        }
+
+        this.producer = new ProducerBuilder<string?, byte[]>(producerConfig)
+            .SetStatisticsHandler((_, json) => RouterStatisticsCollector.Handle(json))
+            .Build();
         this.logger.Debug(
             $"Initiating Connection to Kafka server: {kafkaConfig.Server} with SessionKey publishing is complete");
     }

@@ -61,7 +61,7 @@ public class RouterEndToEndTests
         var route3 = new KafkaRoute("route3", topicName3);
         var configuration = new RoutingConfiguration(
             new KafkaRoutingConfig(
-                new KafkaPublishingConfig(),
+                new KafkaPublishingConfig(Server, new Dictionary<string, string> { ["linger.ms"] = "20", ["batch.size"] = "4194304" }),
                 [route1, route2, route3],
                 [new KafkaTopicMetaData(topicName1), new KafkaTopicMetaData(topicName2), new KafkaTopicMetaData(topicName3)],
                 "dead-letter"));
@@ -156,7 +156,7 @@ public class RouterEndToEndTests
         var route3 = new KafkaRoute("route3", topicName3);
         var configuration = new RoutingConfiguration(
             new KafkaRoutingConfig(
-                new KafkaPublishingConfig(),
+                new KafkaPublishingConfig(Server, new Dictionary<string, string> { ["linger.ms"] = "20", ["batch.size"] = "4194304" }),
                 [route1, route2, route3],
                 [new KafkaTopicMetaData(topicName1), new KafkaTopicMetaData(topicName2), new KafkaTopicMetaData(topicName3)],
                 "dead-letter"));
@@ -260,7 +260,7 @@ public class RouterEndToEndTests
         const string DeadLetterTopic = "dead-letter";
         var configuration = new RoutingConfiguration(
             new KafkaRoutingConfig(
-                new KafkaPublishingConfig(),
+                new KafkaPublishingConfig(Server, new Dictionary<string, string> { ["linger.ms"] = "20", ["batch.size"] = "4194304" }),
                 [],
                 [],
                 DeadLetterTopic));

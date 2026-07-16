@@ -1,0 +1,55 @@
+{
+    "_comment": "Copy this file to kafka-publisher.json and edit as needed. Remove any property to accept the default. See comments inline.",
+    "design": {
+        "_comment": "Routing-design settings — broker-agnostic. Safe to commit to source control.",
+        "deadLetterTopic": "dead-letter",
+        "routes": [
+            {
+                "name": "my-route",
+                "topic": "my-topic",
+                "partition": null
+            }
+        ],
+        "topicsMetaData": [
+            {
+                "topic": "my-topic",
+                "numberOfPartitions": 1,
+                "replicationFactor": 1
+            },
+            {
+                "topic": "dead-letter",
+                "numberOfPartitions": 1,
+                "replicationFactor": 1
+            }
+        ]
+    },
+    "kafkaBroker": {
+        "_comment": "Kafka-specific producer settings — would change if the broker type changes.",
+        "bootstrapServers": "localhost:9092",
+        "clientId": null,
+        "compressionType": "none",
+        "compressionLevel": -1,
+        "lingerMs": 20,
+        "batchSize": 4194304,
+        "queueBufferingMaxMessages": 0,
+        "queueBufferingMaxKbytes": 0,
+        "messageMaxBytes": 1000000,
+        "messageTimeoutMs": 300000,
+        "requestTimeoutMs": 30000,
+        "acks": "all",
+        "maxInFlight": 1000000,
+        "enableIdempotence": false,
+        "transactionalId": null,
+        "security": {
+            "_comment": "Sensitive values use ${ENV_VAR_NAME} placeholders. They are resolved from environment variables at startup so secrets never have to be stored in this file.",
+            "protocol": "Plaintext",
+            "saslMechanism": null,
+            "saslUsername": "${KAFKA_SASL_USERNAME}",
+            "saslPassword": "${KAFKA_SASL_PASSWORD}",
+            "sslCaLocation": null,
+            "sslCertificateLocation": null,
+            "sslKeyLocation": "${KAFKA_SSL_KEY_LOCATION}",
+            "sslKeyPassword": "${KAFKA_SSL_KEY_PASSWORD}"
+        }
+    }
+}

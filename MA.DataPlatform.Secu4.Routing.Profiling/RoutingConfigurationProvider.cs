@@ -29,7 +29,13 @@ public class RoutingConfigurationProvider : IRoutingConfigurationProvider
     {
         return new RoutingConfiguration(
             new KafkaRoutingConfig(
-                new KafkaPublishingConfig("localhost:9092", -1, 0, 0, 10_000_000, 100_000_000),
+                new KafkaPublishingConfig(
+                    "localhost:9092",
+                    new Dictionary<string, string>
+                    {
+                        ["queue.buffering.max.messages"] = "10000000",
+                        ["queue.buffering.max.kbytes"]   = "100000000",
+                    }),
                 [new KafkaRoute("test", "test")],
                 [new KafkaTopicMetaData("test")],
                 "dead-letter"));

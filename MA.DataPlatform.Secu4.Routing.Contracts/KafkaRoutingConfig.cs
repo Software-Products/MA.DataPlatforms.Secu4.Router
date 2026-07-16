@@ -23,19 +23,30 @@ public class KafkaRoutingConfig
         KafkaPublishingConfig kafkaPublishingConfig,
         List<KafkaRoute> kafkaRoutes,
         List<KafkaTopicMetaData> routesMetaData,
-        string deadLetterTopic)
+        string deadLetterTopic,
+        KafkaSecurityConfig? security = null)
     {
         this.KafkaPublishingConfig = kafkaPublishingConfig;
         this.KafkaRoutes = kafkaRoutes;
         this.RoutesMetaData = routesMetaData;
         this.DeadLetterTopic = deadLetterTopic;
+        this.Security = security;
     }
 
+    /// <summary>Kafka-specific broker settings for the producer.</summary>
     public KafkaPublishingConfig KafkaPublishingConfig { get; }
 
+    /// <summary>Design-relative: routing table mapping route names to Kafka topics.</summary>
     public List<KafkaRoute> KafkaRoutes { get; }
 
+    /// <summary>Design-relative: metadata used for topic auto-creation.</summary>
     public List<KafkaTopicMetaData> RoutesMetaData { get; }
 
+    /// <summary>Design-relative: topic to route unresolvable messages to.</summary>
     public string DeadLetterTopic { get; }
+
+    /// <summary>Optional Kafka broker authentication/authorisation settings.
+    /// Sensitive values should be injected via environment variables.
+    /// </summary>
+    public KafkaSecurityConfig? Security { get; }
 }
